@@ -343,6 +343,8 @@ extern "C" void fft_model(const void *tables) {
                 assert(very_close(tsn[2],accurate_sin(-(n/nn)*(off+2),n)));
                 assert(very_close(tsn[3],accurate_sin(-(n/nn)*(off+3),n)));
 #endif
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wrestrict"
                 dotp4(tmp0, re1, tcs); // re*cos
                 dotp4(tmp1, re1, tsn); // re*sin
                 dotp4(tmp2, im1, tcs); // im*cos
@@ -357,6 +359,7 @@ extern "C" void fft_model(const void *tables) {
                 copy4(im0, tmp3);
                 copy4(re1, tmp0);
                 copy4(im1, tmp1);
+#pragma GCC diagnostic pop
             }
         }
         cur_tt += nn;
