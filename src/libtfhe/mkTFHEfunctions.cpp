@@ -160,6 +160,23 @@ EXPORT void MKlweSubTo(MKLweSample* result, const MKLweSample* sample, const MKT
     result->current_variance += sample->current_variance; 
 }
 
+/** result = result + sample */
+EXPORT void MKlweAddTo(MKLweSample* result, const MKLweSample* sample, const MKTFHEParams* MKparams){
+    const int32_t n = MKparams->n;
+    const int32_t parties = MKparams->parties;
+
+    for (int i = 0; i < parties; ++i)
+    {
+        for (int j = 0; j < n; ++j)
+        {
+            result->a[i*n+j] += sample->a[i*n+j];
+        }
+    }
+    
+    result->b += sample->b;
+
+    result->current_variance += sample->current_variance; 
+}
 
 /** result = sample */
 EXPORT void MKlweCopy(MKLweSample* result, const MKLweSample* sample, const MKTFHEParams* params){
@@ -2167,6 +2184,30 @@ EXPORT void MKbootsNAND_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, con
     MKlweNoiselessTrivial(temp_result, NandConst, MKparams);
     MKlweSubTo(temp_result, ca, MKparams);
     MKlweSubTo(temp_result, cb, MKparams);
+
+
+    //if the phase is positive, the result is 1/8
+    //if the phase is positive, else the result is -1/8
+    MKtfhe_bootstrapFFT_v2m2(result, bkFFT, MU, temp_result, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);   
+
+    delete_MKLweSample(temp_result);
+}
+
+// MK Bootstrapped AND 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsAND_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
+        const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey) 
+{
+    static const Torus32 MU = modSwitchToTorus32(1, 8);
+
+    MKLweSample *temp_result = new_MKLweSample(LWEparams, MKparams);
+
+    //compute: (0,-1/8) + ca + cb
+    static const Torus32 AndConst = modSwitchToTorus32(-1, 8);
+    MKlweNoiselessTrivial(temp_result, AndConst, MKparams);
+    MKlweAddTo(temp_result, ca, MKparams);
+    MKlweAddTo(temp_result, cb, MKparams);
 
 
     //if the phase is positive, the result is 1/8
