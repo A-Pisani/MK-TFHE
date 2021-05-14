@@ -2290,7 +2290,7 @@ EXPORT void MKbootsOR_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, const
 
 // MK Bootstrapped XOR 
 // Only the PK part of RLWEkey is used 
-EXPORT void MKbootsOR_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
+EXPORT void MKbootsXOR_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
         const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
         const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey) 
 {
@@ -2335,4 +2335,42 @@ EXPORT void MKbootsCONSTANT_FFT_v2m2(MKLweSample *result, int32_t value, const M
 {
     static const Torus32 MU = modSwitchToTorus32(1, 8);
     MKlweNoiselessTrivial(result, value ? MU : -MU, MKparams);
+}
+
+// MK Bootstrapped FULL_ADDER 
+// Only the PK part of RLWEkey is used
+EXPORT void full_adder(MKLweSample *sum, const MKLweSample *x, const MKLweSample *y, const int32_t nb_bits,
+                const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey)  {
+    // carries
+    MKLweSample *carry = new_MKLweSample_array(2, LWEparams, MKparams);
+    MKbootsCONSTANT_FFT_v2m2(carry, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); // first carry initialized to 0
+    // temps
+    MKLweSample *temp = new_MKLweSample_array(3, LWEparams, MKparams);
+    MKbootsCONSTANT_FFT_v2m2(temp, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); 
+
+    for (int32_t i = 0; i < nb_bits; ++i) {
+        //sumi = xi XOR yi XOR carry(i-1) 
+        MKbootsXOR_FFT_v2m2(temp, x + i, y + i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); // temp = xi XOR yi
+        MKbootsXOR_FFT_v2m2(sum + i, temp, carry, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); // temp = xi XOR yi    
+
+        // carry = (xi AND yi) XOR (carry(i-1) AND (xi XOR yi))
+        MKbootsAND_FFT_v2m2(temp + 1, x + i, y + i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); // temp1 = xi AND yi
+        MKbootsAND_FFT_v2m2(temp + 2, carry, temp, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); // temp2 = carry AND temp
+        MKbootsXOR_FFT_v2m2(carry + 1, temp + 1, temp + 2, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+        MKbootsCOPY_FFT_v2m2(carry, carry + 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);  
+    }
+    MKbootsCOPY_FFT_v2m2(sum + nb_bits, carry, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+
+    delete_MKLweSample_array(3, temp);
+    delete_MKLweSample_array(2, carry);
 }
