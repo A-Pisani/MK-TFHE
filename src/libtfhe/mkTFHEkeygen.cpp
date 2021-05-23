@@ -81,7 +81,7 @@ EXPORT void MKtLweExtractKey(MKLweKey* LWEkey, const MKRLweKey* RLWEkey)
     const int32_t parties = RLWEkey->MKparams->parties;
     const int32_t N = RLWEkey->MKparams->N;
     
-    assert(result->params->n_extract == N);
+    //assert(result->params->n_extract == N);
 
     for (int i = 0; i < parties; ++i)
     {
