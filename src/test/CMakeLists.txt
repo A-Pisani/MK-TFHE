@@ -45,6 +45,7 @@ set(CPP_ITESTS
 	testMKbootXOR_FFT_v2
 	testMKbootCOPY_FFT_v2
 	testMKbootNOT_FFT_v2
+	testMKbootCONSTANT_FFT_v2
         )
 
 set(C_ITESTS
