@@ -353,5 +353,44 @@ EXPORT void MKbootsXOR_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, cons
         const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
         const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
 
+// MK Bootstrapped NOT 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsNOT_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey); 
+// MK Bootstrapped NOT 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsNOT_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
+
+// MK Bootstrapped COPY 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsCOPY_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey); 
+// MK Bootstrapped COPY 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsCOPY_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);  
+
+// MK Bootstrapped CONSTANT 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsCONSTANT_v2m2(MKLweSample *result, int32_t value, const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
+// MK Bootstrapped CONSTANT 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsCONSTANT_FFT_v2m2(MKLweSample *result, int32_t value, const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
+
+// MK Bootstrapped FULL_ADDER 
+// Only the PK part of RLWEkey is used
+EXPORT void full_adder(MKLweSample *sum, const MKLweSample *x, const MKLweSample *y, const int32_t nb_bits,
+                const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
+// MK Bootstrapped FULL_SUBTRACTER
+// Only the PK part of RLWEkey is used
+EXPORT void full_subtracter(MKLweSample *sub, const MKLweSample *x, const MKLweSample *y, const int32_t nb_bits,
+                 const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
+
+   
 
 #endif //MKTFHEFUNCTIONS_H
