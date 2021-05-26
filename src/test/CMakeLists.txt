@@ -40,6 +40,8 @@ set(CPP_ITESTS
         test-long-run
         
         testMKbootNAND_FFT_v2
+	testMKbootAND_FFT_v2
+	testMKbootOR_FFT_v2
         )
 
 set(C_ITESTS

@@ -331,6 +331,17 @@ EXPORT void MKbootsAND_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, cons
         const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
         const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
 
+// MK Bootstrapped OR 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsOR_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
+        const MKLweBootstrappingKey_v2 *bk, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *RLWEkey);
+// MK Bootstrapped OR 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsOR_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, 
+        const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
+
 
 
 #endif //MKTFHEFUNCTIONS_H
