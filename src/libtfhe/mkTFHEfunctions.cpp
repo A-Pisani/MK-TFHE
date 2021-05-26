@@ -2374,3 +2374,63 @@ EXPORT void full_adder(MKLweSample *sum, const MKLweSample *x, const MKLweSample
     delete_MKLweSample_array(3, temp);
     delete_MKLweSample_array(2, carry);
 }
+
+EXPORT void full_subtracter(MKLweSample *sub, const MKLweSample *x, const MKLweSample *y, const int32_t nb_bits,
+                 const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey) {    
+    /*
+    In this case, you can use the bootsCONSTANT function, which has a CloudKeyset in argument.
+    The difference between bootsCONSTANT and bootsSymEncrypt is that the first one only creates a trivial ciphertext (the message is not hidden inside), which does not require the secret key.
+    For the initial borrow, the fact that it contains zero is public knowledge, so bootsCONSTANT is enough.
+    */
+
+    MKLweSample *xNot = new_MKLweSample_array(1, LWEparams, MKparams);
+    MKLweSample *xXorYNot = new_MKLweSample_array(1, LWEparams, MKparams);
+
+    MKLweSample *borrow = new_MKLweSample_array(2, LWEparams, MKparams);
+    MKLweSample *temp = new_MKLweSample_array(3, LWEparams, MKparams);
+
+    //initialize all to 0
+    MKbootsCONSTANT_FFT_v2m2(xNot, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+    MKbootsCONSTANT_FFT_v2m2(xXorYNot, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+    MKbootsCONSTANT_FFT_v2m2(borrow, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+
+    // temps
+    for(int i=0; i< 3; i++)
+        MKbootsCONSTANT_FFT_v2m2(temp + i, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+
+    for (int32_t i = 0; i < nb_bits; ++i) {
+        //sumi = xi XOR yi XOR borrow(i-1) 
+        MKbootsXOR_FFT_v2m2(temp, x + i, y + i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); // temp = xi XOR yi
+        MKbootsXOR_FFT_v2m2(sub + i, temp, borrow, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); // temp = xi XOR yi
+
+        // borrow = (xi AND yi) XOR (borrow(i-1) AND NOT((xi XOR yi)))
+        MKbootsNOT_FFT_v2m2(xXorYNot, temp, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+        MKbootsNOT_FFT_v2m2(xNot, x+i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+        MKbootsNOT_FFT_v2m2(xNot, x+i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+        MKbootsAND_FFT_v2m2(temp + 1, xNot + i, y + i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); // temp1 = NOT(xi) AND yi
+        MKbootsAND_FFT_v2m2(temp + 2, borrow, xXorYNot, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); // temp2 = borrow AND temp
+        MKbootsOR_FFT_v2m2(borrow + 1, temp + 1, temp + 2, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+        MKbootsCOPY_FFT_v2m2(borrow, borrow + 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);  
+    }
+   // bootsCOPY(sum + nb_bits, borrow, bk);
+
+
+    delete_MKLweSample_array(3, temp);
+    delete_MKLweSample_array(2, borrow);
+    delete_MKLweSample_array(1, xNot);
+    delete_MKLweSample_array(1, xXorYNot);
+}          
