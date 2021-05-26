@@ -89,11 +89,6 @@ int32_t main(int32_t argc, char **argv) {
 
     cout << "Params: DONE!" << endl;
 
-
-
-
-
-
    
     // Key generation 
     cout << "Starting KEY GENERATION" << endl;
@@ -139,7 +134,7 @@ int32_t main(int32_t argc, char **argv) {
     int32_t error_count_EncDec = 0;
     
     int32_t error_count_v2m2 = 0;
-    double argv_time_NAND_v2m2 = 0.0;
+    double argv_time_AND_v2m2 = 0.0;
 
 
 
@@ -155,7 +150,7 @@ int32_t main(int32_t argc, char **argv) {
 
         int32_t mess1 = rand() % 2;
         int32_t mess2 = rand() % 2;
-        int32_t out = 1 - (mess1 * mess2);
+        int32_t out = (mess1 * mess2);
         // generate 2 samples in input
         MKLweSample *test_in1 = new_MKLweSample(LWEparams, MKparams);
         MKLweSample *test_in2 = new_MKLweSample(LWEparams, MKparams);
@@ -192,21 +187,21 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
-        // evaluate MK bootstrapped NAND 
-        cout << "Starting MK bootstrapped NAND FFT version 2 method 2: trial " << trial << endl;
-        clock_t begin_NAND_v2m2 = clock();
+        // evaluate MK bootstrapped AND 
+        cout << "Starting MK bootstrapped AND FFT version 2 method 2: trial " << trial << endl;
+        clock_t begin_AND_v2m2 = clock();
         MKbootsAND_FFT_v2m2(test_out_v2m2, test_in1, test_in2, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
-        clock_t end_NAND_v2m2 = clock();
-        double time_NAND_v2m2 = ((double) end_NAND_v2m2 - begin_NAND_v2m2)/CLOCKS_PER_SEC;
-        cout << "Finished MK bootstrapped NAND FFT v2m2" << endl;
-        cout << "Time per MKbootNAND_FFT gate v2m2 (seconds)... " << time_NAND_v2m2 << endl;
+        clock_t end_AND_v2m2 = clock();
+        double time_AND_v2m2 = ((double) end_AND_v2m2 - begin_AND_v2m2)/CLOCKS_PER_SEC;
+        cout << "Finished MK bootstrapped AND FFT v2m2" << endl;
+        cout << "Time per MKbootAND_FFT gate v2m2 (seconds)... " << time_AND_v2m2 << endl;
 
-        argv_time_NAND_v2m2 += time_NAND_v2m2;
+        argv_time_AND_v2m2 += time_AND_v2m2;
 
-        // verify NAND
-        int32_t outNAND_v2m2 = MKbootsSymDecrypt(test_out_v2m2, MKlwekey);
-        cout << "NAND: clear = " << out << ", decrypted = " << outNAND_v2m2 << endl;
-        if (outNAND_v2m2 != out) {
+        // verify AND
+        int32_t outAND_v2m2 = MKbootsSymDecrypt(test_out_v2m2, MKlwekey);
+        cout << "AND: clear = " << out << ", decrypted = " << outAND_v2m2 << endl;
+        if (outAND_v2m2 != out) {
             error_count_v2m2 +=1;
             cout << "ERROR!!! " << trial << "," << trial << " - ";
             cout << t32tod(MKlwePhase(test_in1, MKlwekey)) << " - ";
@@ -231,8 +226,7 @@ int32_t main(int32_t argc, char **argv) {
     cout << "Time per KEY GENERATION (seconds)... " << time_KG << endl;
     
     cout << "ERRORS v2m2: " << error_count_v2m2 << " over " << nb_trials << " tests!" << endl;
-    cout << "Average time per bootNAND_FFT_v2m2: " << argv_time_NAND_v2m2/nb_trials << " seconds" << endl;
-
+    cout << "Average time per bootAND_FFT_v2m2: " << argv_time_AND_v2m2/nb_trials << " seconds" << endl;
     cout << endl << "ERRORS Encrypt/Decrypt: " << error_count_EncDec << " over " << nb_trials << " tests!" << endl;
     
 
