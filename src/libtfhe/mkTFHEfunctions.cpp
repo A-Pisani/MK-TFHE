@@ -2348,15 +2348,13 @@ EXPORT void full_adder(MKLweSample *sum, const MKLweSample *x, const MKLweSample
             MKparams, MKrlwekey); // first carry initialized to 0
     // temps
     MKLweSample *temp = new_MKLweSample_array(3, LWEparams, MKparams);
-    MKbootsCONSTANT_FFT_v2m2(temp, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
-            MKparams, MKrlwekey); 
 
     for (int32_t i = 0; i < nb_bits; ++i) {
         //sumi = xi XOR yi XOR carry(i-1) 
         MKbootsXOR_FFT_v2m2(temp, x + i, y + i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
             MKparams, MKrlwekey); // temp = xi XOR yi
         MKbootsXOR_FFT_v2m2(sum + i, temp, carry, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
-            MKparams, MKrlwekey); // temp = xi XOR yi    
+            MKparams, MKrlwekey);  
 
         // carry = (xi AND yi) XOR (carry(i-1) AND (xi XOR yi))
         MKbootsAND_FFT_v2m2(temp + 1, x + i, y + i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
@@ -2415,9 +2413,8 @@ EXPORT void full_subtracter(MKLweSample *sub, const MKLweSample *x, const MKLweS
             MKparams, MKrlwekey);
         MKbootsNOT_FFT_v2m2(xNot, x+i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
             MKparams, MKrlwekey);
-        MKbootsNOT_FFT_v2m2(xNot, x+i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
-            MKparams, MKrlwekey);
-        MKbootsAND_FFT_v2m2(temp + 1, xNot + i, y + i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            
+        MKbootsAND_FFT_v2m2(temp + 1, xNot, y + i, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
             MKparams, MKrlwekey); // temp1 = NOT(xi) AND yi
         MKbootsAND_FFT_v2m2(temp + 2, borrow, xXorYNot, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
             MKparams, MKrlwekey); // temp2 = borrow AND temp
