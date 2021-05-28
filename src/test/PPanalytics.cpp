@@ -211,6 +211,7 @@ int32_t main(int32_t argc, char **argv) {
 
         data2[i][j] = data[i][j] - data1[i][j];
         std::cout << "random share 1 of data: " << data2[i][j] << endl;
+        // TODO : ENCRYPT
 
         // generating alpha
         alpha[i][j] = dist(rd) % Modulus;
@@ -224,6 +225,7 @@ int32_t main(int32_t argc, char **argv) {
         alpha2[i][j] = alpha[i][j] - alpha1[i][j];
         std::cout << "random share 1 of alpha: " << alpha2[i][j] << endl;
 
+        // TODO : ENCRYPT
 
         // generating beta
         beta[i][j] = dist(rd) % Modulus;
@@ -250,6 +252,7 @@ int32_t main(int32_t argc, char **argv) {
         gamma2[i][j] = gamma[i][j] - gamma1[i][j];
         std::cout << "random share 1 of gamma: " << gamma2[i][j] << endl; 
         }
+        // TODO : ENCRYPT
     }
 
     std::cout << "Data Preparation for the Beaver triplets Done" << endl;
@@ -287,22 +290,7 @@ int32_t main(int32_t argc, char **argv) {
     }
 
 
-    int t = 0;
-    int min = authorisedRj[0];
-    int max = authorisedRj[0];
-
-    // automatic deciding t
-    for(int i=1; i<numberofReceivers; i++){
-        // If current element is greater than max
-            if(authorisedRj[i] > max)
-                max = authorisedRj[i];
-            // If current element is smaller than min
-            if(authorisedRj[i] < min)
-                min = authorisedRj[i];
-        }
-    t = (min + max) / 2; 
-    //std::cout << "min t: " << min << endl;
-    //std::cout << "max t: " << max << endl;
+    int t = 2;
     std::cout << "threshold t:"<< "\t" << t << endl;
 
     // int dataAggforAuthorisedRj[numberofReceivers];
@@ -315,6 +303,50 @@ int32_t main(int32_t argc, char **argv) {
     // }
 
     std::cout << "Learning authorised Receivers Done" << endl;
+
+    std::cout << "Aggregation Started" << endl; 
+
+
+	/* for (int i = 0; i < numberofDataOwners; ++i){
+	    for (int j = 0; j < numberofReceivers; ++j){
+	      if (dataAggforAuthorisedRj[j]==1){
+	        ////////////////
+	        //by Agg
+	        //////////////// 
+	      	epsilon1[i][j]= data1[i][j] + alpha1[i][j];
+	      	delta1[i][j] = choice_vector1[i][j] + beta1[i][j];
+
+	        ////////////////
+	        // by Dec
+	        ////////////////
+	        epsilon2[i][j]= data2[i][j] + alpha2[i][j];
+	      	delta2[i][j] = choice_vector2[i][j] + beta2[i][j];
+
+	        ////////////////
+	        // both
+	        ////////////////
+	        epsilon[i][j] = epsilon1[i][j] + epsilon2[i][j];
+	        delta[i][j] = delta1[i][j] + delta2[i][j]; 
+
+	        ////////////////
+	        //by Agg
+	        //////////////// 
+	        partialAdd1[i][j] = gamma1[i][j] + epsilon[i][j]*choice_vector1[i][j]+delta[i][j]*data1[i][j];
+
+	        ////////////////
+	        // by Dec
+	        ////////////////
+	       	partialAdd2[i][j] = gamma2[i][j] + epsilon[i][j]*choice_vector2[i][j]+delta[i][j]*data2[i][j];
+
+	        ////////////////
+	        // by Dec
+	        ////////////////
+	        partialAdd[i][j] = partialAdd1[i][j] + partialAdd2[i][j];
+	        result[i][j] = partialAdd[i][j] - epsilon[i][j]*delta[i][j];
+
+		    }
+		}
+	} */
 
 
 
