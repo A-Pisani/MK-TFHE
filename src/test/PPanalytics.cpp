@@ -138,7 +138,7 @@ int32_t main(int32_t argc, char **argv) {
 
     std::cout << "Data Preparation for the Beaver triplets Started" << endl;
 
-
+    int16_t nb_bits = 16;
     // choice vector
     int choice_vector[numberofDataOwners][numberofReceivers]; 
     int choice_vector1[numberofDataOwners][numberofReceivers]; 
@@ -149,10 +149,18 @@ int32_t main(int32_t argc, char **argv) {
     int data1[numberofDataOwners][numberofReceivers]; 
     int data2[numberofDataOwners][numberofReceivers];  
 
+    // sensitive data ciphertext
+    MKLweSample *dataEnc1[numberofDataOwners][numberofReceivers];
+    MKLweSample *dataEnc2[numberofDataOwners][numberofReceivers];
+
     // random data for Beaver's triplets
     int alpha[numberofDataOwners][numberofReceivers]; 
     int alpha1[numberofDataOwners][numberofReceivers]; 
     int alpha2[numberofDataOwners][numberofReceivers];
+
+    // alpha ciphertext
+    MKLweSample *alphaEnc1[numberofDataOwners][numberofReceivers];
+    MKLweSample *alphaEnc2[numberofDataOwners][numberofReceivers];
 
     int beta[numberofDataOwners][numberofReceivers]; 
     int beta1[numberofDataOwners][numberofReceivers]; 
@@ -161,6 +169,10 @@ int32_t main(int32_t argc, char **argv) {
     int gamma[numberofDataOwners][numberofReceivers]; 
     int gamma1[numberofDataOwners][numberofReceivers]; 
     int gamma2[numberofDataOwners][numberofReceivers];
+
+    // gamma ciphertext
+    MKLweSample *gammaEnc1[numberofDataOwners][numberofReceivers];
+    MKLweSample *gammaEnc2[numberofDataOwners][numberofReceivers];
 
     // int epsilon[numberofDataOwners][numberofReceivers]; 
     // int epsilon1[numberofDataOwners][numberofReceivers]; 
@@ -177,7 +189,7 @@ int32_t main(int32_t argc, char **argv) {
     // int result[numberofDataOwners][numberofReceivers]; 
 
 
-    int Modulus = 41; //41>2^5 // Modulus should be a prime number
+    int Modulus = 11; //41>2^5 // Modulus should be a prime number
 
     // for random numbers
     std::random_device rd;
@@ -185,74 +197,104 @@ int32_t main(int32_t argc, char **argv) {
 
     for(int i=0; i<numberofDataOwners; i++){
         for(int j=0; j<numberofReceivers; j++){
+            // choosing Receivers for each DO
+            choice_vector[i][j] = dist(rd) % 2;
+            std::cout << "random number for choice: " << choice_vector[i][j] << endl;
 
-        // choosing Receivers for each DO
-        choice_vector[i][j] = dist(rd) % 2;
-        std::cout << "random number for choice: " << choice_vector[i][j] << endl;
+            if(choice_vector[i][j]!= 0)
+                choice_vector1[i][j] = dist(rd) % choice_vector[i][j];
+            else
+                choice_vector1[i][j] = 0;
+            std::cout << "random share 1 for choice: " << choice_vector1[i][j] << endl;
 
-        if(choice_vector[i][j]!= 0)
-            choice_vector1[i][j] = dist(rd) % choice_vector[i][j];
-        else
-            choice_vector1[i][j] = 0;
-        std::cout << "random share 1 for choice: " << choice_vector1[i][j] << endl;
+            choice_vector2[i][j] = choice_vector[i][j] - choice_vector1[i][j];
+            std::cout << "random share 2 for choice: " << choice_vector2[i][j] << endl;
 
-        choice_vector2[i][j] = choice_vector[i][j] - choice_vector1[i][j];
-        std::cout << "random share 2 for choice: " << choice_vector2[i][j] << endl;
+            // data of each DO          -------> TO BE ENCRYPTED
+            if(choice_vector[i][j] == 1)
+                data[i][j] = 36; 
+            else
+                data[i][j] = dist(rd) % Modulus;
+            
+            std::cout << "data: " << i << j << "\t" << data[i][j] << endl;
+            data1[i][j] = dist(rd) % data[i][j];
+            std::cout << "random share 1 of data: " << data1[i][j] << endl;
 
-        // data of each DO          -------> TO BE ENCRYPTED
-        if(choice_vector[i][j] == 1)
-            data[i][j] = 36; 
-        else
-            data[i][j] = dist(rd) % Modulus;
-        
-        std::cout << "data: " << i << j << "\t" << data[i][j] << endl;
-        data1[i][j] = dist(rd) % data[i][j];
-        std::cout << "random share 1 of data: " << data1[i][j] << endl;
+            data2[i][j] = data[i][j] - data1[i][j];
+            std::cout << "random share 1 of data: " << data2[i][j] << endl;
+            // data of each DO          -------> ENCRYPTED
+            dataEnc1[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
+            dataEnc2[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&dataEnc1[i][j][k], i, (data1[i][j]>>i)&1, 0, &MKlwekey->key[i]);
+                MKlweNthPartyEncrypt(&dataEnc2[i][j][k], i, (data2[i][j]>>i)&1, 0, &MKlwekey->key[i]);
+            }
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&dataEnc1[i][j][k], i+1, (data1[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
+                MKlweNthPartyEncrypt(&dataEnc2[i][j][k], i+1, (data2[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
+            }
 
-        data2[i][j] = data[i][j] - data1[i][j];
-        std::cout << "random share 1 of data: " << data2[i][j] << endl;
-        // TODO : ENCRYPT
 
-        // generating alpha
-        alpha[i][j] = dist(rd) % Modulus;
-        std::cout << "alpha: " << alpha[i][j] << endl;
-        if(alpha[i][j] != 0){
-            alpha1[i][j] = dist(rd) % alpha[i][j];
-        }else{
-            alpha1[i][j] = 1;
+            // generating alpha
+            alpha[i][j] = dist(rd) % Modulus;
+            std::cout << "alpha: " << alpha[i][j] << endl;
+            if(alpha[i][j] != 0){
+                alpha1[i][j] = dist(rd) % alpha[i][j];
+            }else{
+                alpha1[i][j] = 1;
+            }
+            std::cout << "random share 1 of alpha: " << alpha1[i][j] << endl;
+            alpha2[i][j] = alpha[i][j] - alpha1[i][j];
+            std::cout << "random share 1 of alpha: " << alpha2[i][j] << endl;
+
+            // alpha          -------> ENCRYPTED
+            alphaEnc1[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
+            alphaEnc2[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], i, (alpha1[i][j]>>i)&1, 0, &MKlwekey->key[i]);
+                MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], i, (alpha2[i][j]>>i)&1, 0, &MKlwekey->key[i]);
+            }
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], i+1, (alpha1[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
+                MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], i+1, (alpha2[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
+            }
+
+            // generating beta
+            beta[i][j] = dist(rd) % Modulus;
+            std::cout << "beta: " << beta[i][j] << endl;
+            if(beta[i][j] != 0){
+                beta1[i][j] = dist(rd) % beta[i][j];
+            }else{
+                beta1[i][j] = 0;
+            }
+            std::cout << "random share 1 of beta: " << beta1[i][j] << endl;
+            beta2[i][j] = beta[i][j] - beta1[i][j];
+            std::cout << "random share 1 of beta: " << beta2[i][j] << endl;
+
+
+            //constracting gamma and its shares
+            gamma[i][j] = (alpha[i][j]) * (beta[i][j]);
+            std::cout << "gamma: " << gamma[i][j] << endl;
+            if(gamma[i][j] != 0){
+                gamma1[i][j] = dist(rd) % gamma[i][j];
+            }else{
+                gamma1[i][j] = 0;
+            }
+            std::cout << "random share 1 of gamma: " << gamma1[i][j] << endl;
+            gamma2[i][j] = gamma[i][j] - gamma1[i][j];
+            std::cout << "random share 1 of gamma: " << gamma2[i][j] << endl; 
+            // gamma          -------> ENCRYPTED
+            gammaEnc1[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
+            gammaEnc2[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], i, (gamma1[i][j]>>i)&1, 0, &MKlwekey->key[i]);
+                MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], i, (gamma2[i][j]>>i)&1, 0, &MKlwekey->key[i]);
+            }
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], i+1, (gamma1[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
+                MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], i+1, (gamma2[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
+            }
         }
-        std::cout << "random share 1 of alpha: " << alpha1[i][j] << endl;
-        alpha2[i][j] = alpha[i][j] - alpha1[i][j];
-        std::cout << "random share 1 of alpha: " << alpha2[i][j] << endl;
-
-        // TODO : ENCRYPT
-
-        // generating beta
-        beta[i][j] = dist(rd) % Modulus;
-        std::cout << "beta: " << beta[i][j] << endl;
-        if(beta[i][j] != 0){
-            beta1[i][j] = dist(rd) % beta[i][j];
-        }else{
-            beta1[i][j] = 0;
-        }
-        std::cout << "random share 1 of beta: " << beta1[i][j] << endl;
-        beta2[i][j] = beta[i][j] - beta1[i][j];
-        std::cout << "random share 1 of beta: " << beta2[i][j] << endl;
-
-
-        //constracting gamma and its shares
-        gamma[i][j] = (alpha[i][j]) * (beta[i][j]);
-        std::cout << "gamma: " << gamma[i][j] << endl;
-        if(gamma[i][j] != 0){
-            gamma1[i][j] = dist(rd) % gamma[i][j];
-        }else{
-            gamma1[i][j] = 0;
-        }
-        std::cout << "random share 1 of gamma: " << gamma1[i][j] << endl;
-        gamma2[i][j] = gamma[i][j] - gamma1[i][j];
-        std::cout << "random share 1 of gamma: " << gamma2[i][j] << endl; 
-        }
-        // TODO : ENCRYPT
     }
 
     std::cout << "Data Preparation for the Beaver triplets Done" << endl;
@@ -287,8 +329,8 @@ int32_t main(int32_t argc, char **argv) {
     // Agg and Dec compute the number of DOs for Rj
     for (int j = 0; j < numberofReceivers; ++j){
         authorisedRj[j] = authorisedRj1[j] + authorisedRj2[j];
+        authorisedRj[j] = authorisedRj[j] ;
     }
-
 
     int t = 2;
     std::cout << "threshold t:"<< "\t" << t << endl;
