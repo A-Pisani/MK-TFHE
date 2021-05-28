@@ -55,6 +55,128 @@ EXPORT void MKlweSymEncrypt(MKLweSample* result, Torus32 message, double alpha, 
 
 
 
+// b = <a_p,s_p> + m + e   for party p
+// m comes with a scaling factor
+EXPORT void MKlweFirstPartyEncrypt(MKLweSample *const sample,
+                                   const int32_t p,   // party index
+                                   const Torus32 message,
+                                   const double alpha,
+                                   const LweKey *const key)
+{
+    const int32_t n = key->params->n;
+    const int32_t parties = sample->parties;
+
+    // init b with noise
+    sample->b = gaussian32(message, alpha);
+
+    for (int i = 0; i < parties; ++i)
+    {
+        if (i == p)
+        {
+            // at p-th block of mask, generate a random mask and add to the masked message
+            for (int j = 0; j < n; ++j)
+            {
+                sample->a[i*n + j] = uniformTorus32_distrib(generator);
+                sample->b += sample->a[i*n + j] * key->key[j];
+            }
+        }
+        else
+        {
+            // at other blocks of mask, fill zeros
+            for (int j = 0; j < n; ++j)
+                sample->a[i*n + j] = 0.0;
+        }
+    }
+
+    sample->current_variance = alpha*alpha;
+}
+
+// b = <a_p,s_p> + m + e   for party p
+// m comes with a scaling factor
+EXPORT void MKlweNthPartyEncrypt(MKLweSample *const sample,
+                                 const int32_t p,   // party index
+                                 const Torus32 message,
+                                 const double alpha,
+                                 const LweKey *const key)
+{
+    const int32_t n = key->params->n;
+    assert(p < sample->parties);
+
+    // at p-th block of mask, generate a random mask and add to the masked message
+    for (int j = 0; j < n; ++j)
+    {
+        assert(sample->a[p*n + j] == 0.0);
+        sample->a[p*n + j] = uniformTorus32_distrib(generator);
+        sample->b += sample->a[p*n + j] * key->key[j];
+    }
+
+    // add own noise to b
+    sample->b += gaussian32(message, alpha);
+    sample->current_variance += alpha*alpha;
+}
+
+// remove p-th party mask
+EXPORT void MKlweNthPartyUnmask(MKLweSample *const sample,
+                                const int32_t p,   // party index
+                                const LweKey *const key)
+{
+    const int32_t n = key->params->n;
+    assert(p < sample->parties);
+
+    // subtract <a_p,s_p> from b and set a_p zero
+    for (int j = 0; j < n; ++j)
+    {
+        sample->b -= sample->a[p*n + j] * key->key[j];
+#ifdef DEBUG
+        sample->a[p*n + j] = 0.0;
+#endif
+    }
+
+    // add noise according to MKHE.PartDec (needed to prevent key leakage)
+    //TODO check what noise magnitude is to be used
+    sample->b += gaussian32(message, alpha);
+    sample->current_variance += alpha*alpha;
+}
+
+// decrypt by removing the last party's mask
+EXPORT Torus32 MKlweLastPartyDecrypt(const MKLweSample *const sample,
+                                     const int32_t p,   // party index
+                                     const LweKey *const key,
+                                     const int32_t Msize)
+{
+    const int32_t n = key->params->n;
+    assert(p < sample->parties);
+
+    Torus32 phi = sample->b;
+
+#ifdef DEBUG
+    const int32_t parties = sample->parties;
+
+    for (int i = 0; i < parties; ++i)
+    {
+        if (i != p)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                assert(sample->a[i*n + j] == 0.0);
+            }
+        }
+    }
+#endif
+
+    // subtract <a_p,s_p> from b
+    for (int j = 0; j < n; ++j)
+    {
+        phi -= sample->a[p*n + j] * key->key[j];
+    }
+
+    return approxPhase(phi, Msize);
+}
+
+
+
+
+
 /* 
  * This function encrypts a message by using key and a given noise value
 */

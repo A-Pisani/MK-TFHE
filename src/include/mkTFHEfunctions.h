@@ -23,6 +23,46 @@
 // m comes with a scaling factor 
 EXPORT void MKlweSymEncrypt(MKLweSample* result, Torus32 message, double alpha, const MKLweKey* key);
 
+/**
+ *  Initialize sample with encryption using p-th party key.
+ *  Fill other blocks with zeros.
+ *  From MKLweKey * mklk, you get LweKey * key as: mklk->key[p]
+ */
+EXPORT void MKlweFirstPartyEncrypt(MKLweSample *const result,
+                                   const int32_t p,   // party index
+                                   const Torus32 message,
+                                   const double alpha,
+                                   const LweKey *const key);
+
+/**
+ *  Add another layer of encryption using p-th party key to an existing sample.
+ *  Fills its associated block and adds its mask and noise to b.
+ *  From MKLweKey * mklk, you get LweKey * key as: mklk->key[p]
+ */
+EXPORT void MKlweNthPartyEncrypt(MKLweSample *const sample,
+                                 const int32_t p,   // party index
+                                 const Torus32 message,
+                                 const double alpha,
+                                 const LweKey *const key);
+
+/**
+ *  Eliminates p-th block of mask: sets the block to zero and subtracts its <a_p,s_p> product from b.
+ *  From MKLweKey * mklk, you get LweKey * key as: mklk->key[p]
+ */
+EXPORT void MKlweNthPartyUnmask(MKLweSample *const sample,
+                                const int32_t p,   // party index
+                                const LweKey *const key);
+
+/**
+ *  Unmasks last block and rounds the result appropriately.
+ *  From MKLweKey * mklk, you get LweKey * key as: mklk->key[p]
+ */
+EXPORT Torus32 MKlweLastPartyDecrypt(const MKLweSample *const sample,
+                                     const int32_t p,   // party index
+                                     const LweKey *const key,
+                                     const int32_t Msize);
+
+
 EXPORT void MKlweSymEncryptWithExternalNoise(MKLweSample* result, Torus32 message, double noise, double alpha, 
         const MKLweKey* key);
 
