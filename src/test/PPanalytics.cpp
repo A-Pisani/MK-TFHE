@@ -212,14 +212,15 @@ int32_t main(int32_t argc, char **argv) {
         data2[i][j] = data[i][j] - data1[i][j];
         std::cout << "random share 1 of data: " << data2[i][j] << endl;
 
-
         // generating alpha
         alpha[i][j] = dist(rd) % Modulus;
         std::cout << "alpha: " << alpha[i][j] << endl;
-
-        alpha1[i][j] = dist(rd) % alpha[i][j];
+        if(alpha[i][j] != 0){
+            alpha1[i][j] = dist(rd) % alpha[i][j];
+        }else{
+            alpha1[i][j] = 1;
+        }
         std::cout << "random share 1 of alpha: " << alpha1[i][j] << endl;
-
         alpha2[i][j] = alpha[i][j] - alpha1[i][j];
         std::cout << "random share 1 of alpha: " << alpha2[i][j] << endl;
 
@@ -227,10 +228,12 @@ int32_t main(int32_t argc, char **argv) {
         // generating beta
         beta[i][j] = dist(rd) % Modulus;
         std::cout << "beta: " << beta[i][j] << endl;
-
-        beta1[i][j] = dist(rd) % beta[i][j];
+        if(beta[i][j] != 0){
+            beta1[i][j] = dist(rd) % beta[i][j];
+        }else{
+            beta1[i][j] = 0;
+        }
         std::cout << "random share 1 of beta: " << beta1[i][j] << endl;
-
         beta2[i][j] = beta[i][j] - beta1[i][j];
         std::cout << "random share 1 of beta: " << beta2[i][j] << endl;
 
@@ -238,10 +241,12 @@ int32_t main(int32_t argc, char **argv) {
         //constracting gamma and its shares
         gamma[i][j] = (alpha[i][j]) * (beta[i][j]);
         std::cout << "gamma: " << gamma[i][j] << endl;
-
-        gamma1[i][j] = dist(rd) % gamma[i][j];
+        if(gamma[i][j] != 0){
+            gamma1[i][j] = dist(rd) % gamma[i][j];
+        }else{
+            gamma1[i][j] = 0;
+        }
         std::cout << "random share 1 of gamma: " << gamma1[i][j] << endl;
-
         gamma2[i][j] = gamma[i][j] - gamma1[i][j];
         std::cout << "random share 1 of gamma: " << gamma2[i][j] << endl; 
         }
