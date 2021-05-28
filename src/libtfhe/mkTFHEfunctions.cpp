@@ -118,6 +118,8 @@ EXPORT void MKlweNthPartyEncrypt(MKLweSample *const sample,
 // remove p-th party mask
 EXPORT void MKlweNthPartyUnmask(MKLweSample *const sample,
                                 const int32_t p,   // party index
+                                const Torus32 message,
+                                const double alpha,
                                 const LweKey *const key)
 {
     const int32_t n = key->params->n;
