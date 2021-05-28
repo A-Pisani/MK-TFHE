@@ -2555,3 +2555,35 @@ EXPORT void full_subtracter(MKLweSample *sub, const MKLweSample *x, const MKLweS
     delete_MKLweSample_array(1, xNot);
     delete_MKLweSample_array(1, xXorYNot);
 }          
+
+// MK Bootstrapped MULTIPLIER  
+// Only the PK part of RLWEkey is used
+EXPORT MKLweSample *mulTimesPlain(MKLweSample *total, int32_t val, const int32_t nb_bits,
+                const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey)  {
+    
+    if(val==1)return total;
+    // tmp adders
+    MKLweSample *sum = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
+    MKLweSample *sum2 = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
+
+
+    for (int32_t i = 0; i < val; ++i) {
+        if(i == 0)
+            full_adder(sum, total, total, nb_bits-1, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+        else{
+            if(i%2==0){
+                full_adder(sum, sum2, total, nb_bits-1, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            }
+            else if(i%2==1){
+                full_adder(sum2, sum, total, nb_bits-1, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            }
+        }  
+    }
+
+    if(val%2 == 0)
+        return sum;
+    else 
+        return sum2;
+}
+

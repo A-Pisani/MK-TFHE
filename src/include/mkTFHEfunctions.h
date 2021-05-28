@@ -433,6 +433,11 @@ EXPORT void full_subtracter(MKLweSample *sub, const MKLweSample *x, const MKLweS
                  const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
                 const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
 
+// MK Bootstrapped MULTIPLIER  
+// Only the PK part of RLWEkey is used
+EXPORT MKLweSample *mulTimesPlain(MKLweSample *total, int32_t val, const int32_t nb_bits,
+                const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
    
 
 #endif //MKTFHEFUNCTIONS_H
