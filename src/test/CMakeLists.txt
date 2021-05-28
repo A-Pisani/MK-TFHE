@@ -47,6 +47,7 @@ set(CPP_ITESTS
 	testMKbootNOT_FFT_v2
 	testMKbootCONSTANT_FFT_v2
 	testMKbootFULL_ADDER
+	PPanalytics
         )
 
 set(C_ITESTS
