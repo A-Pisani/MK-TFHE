@@ -2467,7 +2467,7 @@ EXPORT void full_adder(MKLweSample *sum, const MKLweSample *x, const MKLweSample
                 const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
                 const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey)  {
     // carries
-    MKLweSample *carry = new_MKLweSample_array(2, LWEparams, MKparams);
+    MKLweSample *carry = new_MKLweSample(LWEparams, MKparams);
     MKbootsCONSTANT_FFT_v2m2(carry, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
             MKparams, MKrlwekey); // first carry initialized to 0
     // temps
@@ -2485,16 +2485,13 @@ EXPORT void full_adder(MKLweSample *sum, const MKLweSample *x, const MKLweSample
             MKparams, MKrlwekey); // temp1 = xi AND yi
         MKbootsAND_FFT_v2m2(temp + 2, carry, temp, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
             MKparams, MKrlwekey); // temp2 = carry AND temp
-        MKbootsXOR_FFT_v2m2(carry + 1, temp + 1, temp + 2, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+        MKbootsXOR_FFT_v2m2(carry, temp + 1, temp + 2, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
             MKparams, MKrlwekey);
-        MKbootsCOPY_FFT_v2m2(carry, carry + 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
-            MKparams, MKrlwekey);  
     }
     MKbootsCOPY_FFT_v2m2(sum + nb_bits, carry, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
             MKparams, MKrlwekey);
 
     delete_MKLweSample_array(3, temp);
-    delete_MKLweSample_array(2, carry);
 }
 
 EXPORT void full_subtracter(MKLweSample *sub, const MKLweSample *x, const MKLweSample *y, const int32_t nb_bits,
@@ -2549,7 +2546,6 @@ EXPORT void full_subtracter(MKLweSample *sub, const MKLweSample *x, const MKLweS
     }
    // bootsCOPY(sum + nb_bits, borrow, bk);
 
-
     delete_MKLweSample_array(3, temp);
     delete_MKLweSample_array(2, borrow);
     delete_MKLweSample_array(1, xNot);
@@ -2563,27 +2559,34 @@ EXPORT MKLweSample *mulTimesPlain(MKLweSample *total, int32_t val, const int32_t
                 const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey)  {
     
     if(val==1)return total;
+
     // tmp adders
-    MKLweSample *sum = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
-    MKLweSample *sum2 = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
+    MKLweSample *sum = new_MKLweSample_array(nb_bits+1, LWEparams, MKparams);
+    //MKLweSample *sum2 = new_MKLweSample_array(nb_bits+1, LWEparams, MKparams);
+    // for(int i=0; i< nb_bits + 1; i++){
+    //     MKbootsCONSTANT_FFT_v2m2(sum + i, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+    //         MKparams, MKrlwekey);
+    //     MKbootsCONSTANT_FFT_v2m2(sum2 + i, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+    //         MKparams, MKrlwekey);
+    // }
 
-
-    for (int32_t i = 0; i < val; ++i) {
+    for (int i = 0; i < val-1; i++) {
         if(i == 0)
-            full_adder(sum, total, total, nb_bits-1, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            full_adder(sum, total, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
         else{
-            if(i%2==0){
-                full_adder(sum, sum2, total, nb_bits-1, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
-            }
-            else if(i%2==1){
-                full_adder(sum2, sum, total, nb_bits-1, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
-            }
+            //if(i%2==0){
+                //full_adder(sum, sum2, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+                full_adder(sum, sum, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            // }
+            // else if(i%2==1){
+            //     full_adder(sum2, sum, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            // }
         }  
     }
 
-    if(val%2 == 0)
+    //if(val%2 == 0)
         return sum;
-    else 
-        return sum2;
+    //else 
+    //    return sum2;
 }
 
