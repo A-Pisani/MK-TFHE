@@ -134,103 +134,94 @@ int32_t main(int32_t argc, char **argv) {
     int32_t error_count_EncDec = 0;
     
     int32_t error_count_v2m2 = 0;
-    double argv_time_full_adder_v2m2 = 0.0;
+    double argv_time_multiplier_v2m2 = 0.0;
 
     int32_t nb_bits = 16;
 
 
 
-     for (int trial = 0; trial < nb_trials; ++trial)
+    /* for (int trial = 0; trial < nb_trials; ++trial)
     {
         cout << "****************" << endl;
         cout << "Trial: " << trial << endl;
-        cout << "****************" << endl; 
+        cout << "****************" << endl; */
 
         // use current time as seed for the random generator
         srand(time(0));
 
         int32_t mess1 = rand() % 16;
-        int32_t mess2 = rand() % 16;
-        //int32_t mess1 = 1;
-        //int32_t mess2 = 1;
-        int32_t out = (mess1 + mess2);
+        int32_t mess2 =  2;
+        int32_t out = (mess1 * mess2);
         // generate 2 samples array in input
         MKLweSample *test_in1 = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
-        MKLweSample *test_in2 = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
         for(int i=0; i< nb_bits; i++){
             MKbootsSymEncrypt(&test_in1[i], (mess1>>i)&1, MKlwekey);
-            MKbootsSymEncrypt(&test_in2[i], (mess2>>i)&1, MKlwekey);
         }
         
         // generate output sample array
         MKLweSample *test_out_v2m2 = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
-        for(int i = 0; i < nb_bits + 1; i++){
-            MKbootsCONSTANT_FFT_v2m2(&test_out_v2m2[i], 0, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
-        }
+        // for(int i = 0; i < nb_bits + 1; i++){
+        //     MKbootsCONSTANT_FFT_v2m2(&test_out_v2m2[i], 0, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+        // }
         cout << "Encryption: DONE!" << endl;
 
-        int32_t mess1_dec = 0, mess2_dec = 0;
+        int32_t mess1_dec = 0, out_dec = 0;
         // verify encrypt 
         for(int i = 0; i < nb_bits; i++){
             int ai = MKbootsSymDecrypt(&test_in1[i], MKlwekey)>0;
             mess1_dec |= (ai<<i);
-            int bi = MKbootsSymDecrypt(&test_in2[i], MKlwekey)>0;
-            mess2_dec |= (bi<<i); 
         }
+        for(int i = 0; i < nb_bits + 1; i++){
+            int ai = MKbootsSymDecrypt(&test_out_v2m2[i], MKlwekey)>0;
+            out_dec |= (ai<<i);
+        }
+        cout << "Result (before mul) decrypted = " << out_dec << endl;
         cout << "Message 1: clear = " << mess1 << ", decrypted = " << mess1_dec << endl;
-        cout << "Message 2: clear = " << mess2 << ", decrypted = " << mess2_dec << endl;
+        cout << "Message 2: clear = " << mess2 << endl;
 
         // count encrypt/decrypt errors
-        if (mess1 != mess1_dec)
-        {
-            error_count_EncDec += 1;
-        }
-        if (mess2 != mess2_dec)
-        {
+        if (mess1 != mess1_dec){
             error_count_EncDec += 1;
         }
 
+        // evaluate MK bootstrapped multiplier 
+        //cout << "Starting MK bootstrapped multiplier FFT version 2 method 2: trial " << trial << endl;
+        clock_t begin_multiplier_v2m2 = clock();
+        test_out_v2m2 = mulTimesPlain(test_in1, mess2, nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+        clock_t end_multiplier_v2m2 = clock();
+        double time_multiplier_v2m2 = ((double) end_multiplier_v2m2 - begin_multiplier_v2m2)/CLOCKS_PER_SEC;
+        cout << "Finished MK bootstrapped multiplier FFT v2m2" << endl;
+        cout << "Time per MKbootmultiplier_FFT gate v2m2 (seconds)... " << time_multiplier_v2m2 << endl;
 
-        // evaluate MK bootstrapped full_adder 
-        //cout << "Starting MK bootstrapped full_adder FFT version 2 method 2: trial " << trial << endl;
-        clock_t begin_full_adder_v2m2 = clock();
-        full_adder(test_out_v2m2, test_in1, test_in2, nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
-        clock_t end_full_adder_v2m2 = clock();
-        double time_full_adder_v2m2 = ((double) end_full_adder_v2m2 - begin_full_adder_v2m2)/CLOCKS_PER_SEC;
-        cout << "Finished MK bootstrapped full_adder FFT v2m2" << endl;
-        cout << "Time per MKbootfull_adder_FFT gate v2m2 (seconds)... " << time_full_adder_v2m2 << endl;
+        argv_time_multiplier_v2m2 += time_multiplier_v2m2;
 
-        argv_time_full_adder_v2m2 += time_full_adder_v2m2;
-
-        // verify full_adder
-        int32_t outfull_adder_v2m2 = 0; //MKbootsSymDecrypt(test_out_v2m2, MKlwekey);
+        // verify multiplier
+        int32_t outmultiplier_v2m2 = 0; //MKbootsSymDecrypt(test_out_v2m2, MKlwekey);
 
         for(int i=0; i< nb_bits + 1; i++){
             int ci = MKbootsSymDecrypt(&test_out_v2m2[i], MKlwekey)>0;
-            outfull_adder_v2m2 |= (ci<<i);
+            outmultiplier_v2m2 |= (ci<<i);
         }
 
-        cout << "full_adder: clear = " << out << ", decrypted = " << outfull_adder_v2m2 << endl;
-        if (outfull_adder_v2m2 != out) {
+        cout << "multiplier: clear = " << out << ", decrypted = " << outmultiplier_v2m2 << endl;
+        if (outmultiplier_v2m2 != out) {
             error_count_v2m2 +=1;
             //cout << "ERROR!!! " << trial << "," << trial << " - ";
             cout << t32tod(MKlwePhase(test_in1, MKlwekey)) << " - ";
-            cout << t32tod(MKlwePhase(test_in2, MKlwekey)) << " - ";
             cout << t32tod(MKlwePhase(test_out_v2m2, MKlwekey)) << endl;
         }
 
 
         // delete samples
         delete_MKLweSample_array( nb_bits + 1, test_out_v2m2);
-        delete_MKLweSample_array(nb_bits, test_in2);
         delete_MKLweSample_array(nb_bits, test_in1);
-    }
+    //}
 
     cout << endl;
     cout << "Time per KEY GENERATION (seconds)... " << time_KG << endl;
     
     cout << "ERRORS v2m2: " << error_count_v2m2 << " over " << nb_trials << " tests!" << endl;
-    cout << "Average time per bootfull_adder_FFT_v2m2: " << argv_time_full_adder_v2m2/nb_trials << " seconds" << endl;
+    cout << "Average time per bootmultiplier_FFT_v2m2: " << argv_time_multiplier_v2m2/nb_trials << " seconds" << endl;
     cout << endl << "ERRORS Encrypt/Decrypt: " << error_count_EncDec << " over " << nb_trials << " tests!" << endl;
     
 
