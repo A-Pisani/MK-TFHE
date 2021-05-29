@@ -41,17 +41,16 @@ EXPORT void MKlweFirstPartyEncrypt(MKLweSample *const result,
  */
 EXPORT void MKlweNthPartyEncrypt(MKLweSample *const sample,
                                  const int32_t p,   // party index
-                                 const Torus32 message,
                                  const double alpha,
                                  const LweKey *const key);
 
 /**
- *  Eliminates p-th block of mask: sets the block to zero and subtracts its <a_p,s_p> product from b.
+ *  Eliminates p-th block of mask: sets the block to zero and subtracts its <a_p,s_p> product from b, adds noise.
+ *  TODO: check what noise deviation is to be used
  *  From MKLweKey * mklk, you get LweKey * key as: mklk->key[p]
  */
 EXPORT void MKlweNthPartyUnmask(MKLweSample *const sample,
                                 const int32_t p,   // party index
-                                const Torus32 message,
                                 const double alpha,
                                 const LweKey *const key);
 
@@ -59,7 +58,7 @@ EXPORT void MKlweNthPartyUnmask(MKLweSample *const sample,
  *  Unmasks last block and rounds the result appropriately.
  *  From MKLweKey * mklk, you get LweKey * key as: mklk->key[p]
  */
-EXPORT Torus32 MKlweLastPartyDecrypt(const MKLweSample *const sample,
+EXPORT Torus32 MKlweLastPartyDecrypt(MKLweSample *const sample,
                                      const int32_t p,   // party index
                                      const LweKey *const key,
                                      const int32_t Msize);
