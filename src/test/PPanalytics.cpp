@@ -289,11 +289,20 @@ int32_t main(int32_t argc, char **argv) {
     int delta1[numberofDataOwners][numberofReceivers]; 
     int delta2[numberofDataOwners][numberofReceivers]; 
 
-    // int partialAdd[numberofDataOwners][numberofReceivers]; 
-    // int partialAdd1[numberofDataOwners][numberofReceivers]; 
-    // int partialAdd2[numberofDataOwners][numberofReceivers]; 
+    MKLweSample *epsilonMulchoice_vector1[numberofDataOwners][numberofReceivers]; 
+    MKLweSample *epsilonMulchoice_vector2[numberofDataOwners][numberofReceivers];
+    MKLweSample *deltaMuldata1[numberofDataOwners][numberofReceivers]; 
+    MKLweSample *deltaMuldata2[numberofDataOwners][numberofReceivers];
 
-    // int result[numberofDataOwners][numberofReceivers]; 
+    MKLweSample *epsMulcvPlusDeltaMulData1[numberofDataOwners][numberofReceivers];
+    MKLweSample *epsMulcvPlusDeltaMulData2[numberofDataOwners][numberofReceivers];
+    MKLweSample *epsMulDelta[numberofDataOwners][numberofReceivers];
+
+    MKLweSample *partialAdd[numberofDataOwners][numberofReceivers]; 
+    MKLweSample *partialAdd1[numberofDataOwners][numberofReceivers]; 
+    MKLweSample *partialAdd2[numberofDataOwners][numberofReceivers]; 
+
+    MKLweSample *result[numberofDataOwners][numberofReceivers]; 
 
 
     int Modulus = 11; //41>2^5 // Modulus should be a prime number
@@ -329,16 +338,20 @@ int32_t main(int32_t argc, char **argv) {
 
             data2[i][j] = data[i][j] - data1[i][j];
             std::cout << "random share 1 of data: " << data2[i][j] << endl;
-            // data of each DO          -------> ENCRYPTED
+            // data of each DO          -------> ENCRYPTED --> layers: DO-Dec, DO-Agg, R
             dataEnc1[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
             dataEnc2[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
             for(int k=0; k< nb_bits; k++){
-                MKlweNthPartyEncrypt(&dataEnc1[i][j][k], i, (data1[i][j]>>i)&1, 0, &MKlwekey->key[i]);
-                MKlweNthPartyEncrypt(&dataEnc2[i][j][k], i, (data2[i][j]>>i)&1, 0, &MKlwekey->key[i]);
+                MKlweNthPartyEncrypt(&dataEnc1[i][j][k], i, (data1[i][j]>>k)&1, &MKlwekey->key[i]);
+                MKlweNthPartyEncrypt(&dataEnc2[i][j][k], i, (data2[i][j]>>k)&1, &MKlwekey->key[i]);
             }
             for(int k=0; k< nb_bits; k++){
-                MKlweNthPartyEncrypt(&dataEnc1[i][j][k], i+1, (data1[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
-                MKlweNthPartyEncrypt(&dataEnc2[i][j][k], i+1, (data2[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
+                MKlweNthPartyEncrypt(&dataEnc1[i][j][k], i+1, (data1[i][j]>>k)&1, &MKlwekey->key[i+1]);
+                MKlweNthPartyEncrypt(&dataEnc2[i][j][k], i+1, (data2[i][j]>>k)&1, &MKlwekey->key[i+1]);
+            }
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&dataEnc1[i][j][k], j, (data1[i][j]>>k)&1, &MKlwekey2->key[j]);
+                MKlweNthPartyEncrypt(&dataEnc2[i][j][k], j, (data2[i][j]>>k)&1, &MKlwekey2->key[j]);
             }
 
 
@@ -358,12 +371,16 @@ int32_t main(int32_t argc, char **argv) {
             alphaEnc1[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
             alphaEnc2[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
             for(int k=0; k< nb_bits; k++){
-                MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], i, (alpha1[i][j]>>i)&1, 0, &MKlwekey->key[i]);
-                MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], i, (alpha2[i][j]>>i)&1, 0, &MKlwekey->key[i]);
+                MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], i, (alpha1[i][j]>>k)&1, &MKlwekey->key[i]);
+                MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], i, (alpha2[i][j]>>k)&1, &MKlwekey->key[i]);
             }
             for(int k=0; k< nb_bits; k++){
-                MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], i+1, (alpha1[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
-                MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], i+1, (alpha2[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
+                MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], i+1, (alpha1[i][j]>>k)&1, &MKlwekey->key[i+1]);
+                MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], i+1, (alpha2[i][j]>>k)&1, &MKlwekey->key[i+1]);
+            }
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], j, (alpha1[i][j]>>k)&1, &MKlwekey2->key[j]);
+                MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], j, (alpha2[i][j]>>k)&1, &MKlwekey2->key[j]);
             }
 
             // generating beta
@@ -394,17 +411,84 @@ int32_t main(int32_t argc, char **argv) {
             gammaEnc1[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
             gammaEnc2[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
             for(int k=0; k< nb_bits; k++){
-                MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], i, (gamma1[i][j]>>i)&1, 0, &MKlwekey->key[i]);
-                MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], i, (gamma2[i][j]>>i)&1, 0, &MKlwekey->key[i]);
+                MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], i, (gamma1[i][j]>>i)&1, &MKlwekey->key[i]);
+                MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], i, (gamma2[i][j]>>i)&1, &MKlwekey->key[i]);
             }
             for(int k=0; k< nb_bits; k++){
-                MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], i+1, (gamma1[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
-                MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], i+1, (gamma2[i][j]>>i)&1, 0, &MKlwekey->key[i+1]);
+                MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], i+1, (gamma1[i][j]>>i)&1, &MKlwekey->key[i+1]);
+                MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], i+1, (gamma2[i][j]>>i)&1, &MKlwekey->key[i+1]);
+            }
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], j, (gamma1[i][j]>>k)&1, &MKlwekey2->key[j]);
+                MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], j, (gamma2[i][j]>>k)&1, &MKlwekey2->key[j]);
             }
         }
     }
 
     std::cout << "Data Preparation for the Beaver triplets Done" << endl;
+
+    std::cout << "Masking/Unmaskin Preparation starting" << endl;
+
+    for(int i=0; i<numberofDataOwners; i++){
+        for(int j=0; j<numberofReceivers; j++){
+            ////////////////
+	        //by Dec: removal of keys
+	        //////////////// 
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyUnmask(&dataEnc1[i][j][k], i, (data1[i][j]>>k)&1, &MKlwekey->key[i]);
+                MKlweNthPartyUnmask(&dataEnc2[i][j][k], i, (data2[i][j]>>k)&1, &MKlwekey->key[i]);
+
+                MKlweNthPartyUnmask(&alphaEnc1[i][j][k], i, (alpha1[i][j]>>k)&1, &MKlwekey->key[i]);
+                MKlweNthPartyUnmask(&alphaEnc2[i][j][k], i, (alpha2[i][j]>>k)&1, &MKlwekey->key[i]);
+
+                MKlweNthPartyUnmask(&gammaEnc1[i][j][k], i, (gamma1[i][j]>>i)&1, &MKlwekey->key[i]);
+                MKlweNthPartyUnmask(&gammaEnc2[i][j][k], i, (gamma2[i][j]>>i)&1, &MKlwekey->key[i]);
+            }
+            ////////////////
+	        //by Agg: removal of keys
+	        ////////////////  
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyUnmask(&dataEnc1[i][j][k], i+1, (data1[i][j]>>k)&1, &MKlwekey->key[i+1]);
+                MKlweNthPartyUnmask(&dataEnc2[i][j][k], i+1, (data2[i][j]>>k)&1, &MKlwekey->key[i+1]);
+
+                MKlweNthPartyUnmask(&alphaEnc1[i][j][k], i+1, (alpha1[i][j]>>k)&1, &MKlwekey->key[i+1]);
+                MKlweNthPartyUnmask(&alphaEnc2[i][j][k], i+1, (alpha2[i][j]>>k)&1, &MKlwekey->key[i+1]);
+
+                MKlweNthPartyUnmask(&gammaEnc1[i][j][k], i+1, (gamma1[i][j]>>i)&1, &MKlwekey->key[i+1]);
+                MKlweNthPartyUnmask(&gammaEnc2[i][j][k], i+1, (gamma2[i][j]>>i)&1, &MKlwekey->key[i+1]);
+            }
+            ////////////////
+	        //by Dec: masking of keys
+	        //////////////// 
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&dataEnc1[i][j][k], i+1, (data1[i][j]>>k)&1, &MKlwekey2->key[2]);
+                MKlweNthPartyEncrypt(&dataEnc2[i][j][k], i+1, (data2[i][j]>>k)&1, &MKlwekey2->key[2]);
+
+                MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], i+1, (alpha1[i][j]>>k)&1, &MKlwekey2->key[2]);
+                MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], i+1, (alpha2[i][j]>>k)&1, &MKlwekey2->key[2]);
+
+                MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], i+1, (gamma1[i][j]>>i)&1, &MKlwekey2->key[2]);
+                MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], i+1, (gamma2[i][j]>>i)&1, &MKlwekey2->key[2]);
+            } 
+            ////////////////
+	        //by Agg: masking of keys
+	        //////////////// 
+            for(int k=0; k< nb_bits; k++){
+                MKlweNthPartyEncrypt(&dataEnc1[i][j][k], i+1, (data1[i][j]>>k)&1, &MKlwekey2->key[3]);
+                MKlweNthPartyEncrypt(&dataEnc2[i][j][k], i+1, (data2[i][j]>>k)&1, &MKlwekey2->key[3]);
+
+                MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], i+1, (alpha1[i][j]>>k)&1, &MKlwekey2->key[3]);
+                MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], i+1, (alpha2[i][j]>>k)&1, &MKlwekey2->key[3]);
+
+                MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], i+1, (gamma1[i][j]>>i)&1, &MKlwekey2->key[3]);
+                MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], i+1, (gamma2[i][j]>>i)&1, &MKlwekey2->key[3]);
+            } 
+
+        }
+    }    
+
+
+    std::cout << "Masking/Unmaskin Preparation Done" << endl;
 
     std::cout << "Learning authorised Receivers Started" << endl;
 
@@ -487,21 +571,42 @@ int32_t main(int32_t argc, char **argv) {
 	        delta[i][j] = delta1[i][j] + delta2[i][j]; 
             delta[i][j] = delta[i][j];
 
+
+            epsilonMulchoice_vector1[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
+            epsilonMulchoice_vector2[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
+            deltaMuldata1[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
+            deltaMuldata2[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
+            epsMulcvPlusDeltaMulData1[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
+            epsMulcvPlusDeltaMulData2[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
+            epsMulDelta[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
 	        // ////////////////
 	        // //by Agg
 	        // //////////////// 
 	        // partialAdd1[i][j] = gamma1[i][j] + epsilon[i][j]*choice_vector1[i][j]+delta[i][j]*data1[i][j];
+            epsilonMulchoice_vector1[i][j] = mulTimesPlain(epsilon[i][j], choice_vector1[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            deltaMuldata1[i][j] = mulTimesPlain(dataEnc1[i][j], delta[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            full_adder(epsMulcvPlusDeltaMulData1[i][j], epsilonMulchoice_vector1[i][j], deltaMuldata1[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            full_adder(partialAdd1[i][j], epsMulcvPlusDeltaMulData1[i][j], gammaEnc1[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+
 
 	        // ////////////////
 	        // // by Dec
 	        // ////////////////
 	       	// partialAdd2[i][j] = gamma2[i][j] + epsilon[i][j]*choice_vector2[i][j]+delta[i][j]*data2[i][j];
+            epsilonMulchoice_vector2[i][j] = mulTimesPlain(epsilon[i][j], choice_vector2[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            deltaMuldata2[i][j] = mulTimesPlain(dataEnc2[i][j], delta[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            full_adder(epsMulcvPlusDeltaMulData2[i][j], epsilonMulchoice_vector2[i][j], deltaMuldata2[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            full_adder(partialAdd2[i][j], epsMulcvPlusDeltaMulData2[i][j], gammaEnc2[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+
 
 	        // ////////////////
 	        // // by Dec
 	        // ////////////////
 	        // partialAdd[i][j] = partialAdd1[i][j] + partialAdd2[i][j];
+            full_adder(partialAdd[i][j], partialAdd1[i][j], partialAdd2[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
 	        // result[i][j] = partialAdd[i][j] - epsilon[i][j]*delta[i][j];
+            full_subtracter(result[i][j], partialAdd[i][j], epsMulDelta[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+
 
 		    }
 		}
