@@ -39,15 +39,11 @@ void dieDramatically(string message) {
 } 
 
 
-        
-
-
-
 int32_t main(int32_t argc, char **argv) {
 
-    // Test trials
-    //const int32_t nb_trials = 10;
-
+    ///////////////////////////////////////////////////////////
+    //////      [K1D, K1A, K2D, K2A, K3D, K3A, 0, 0]     //////
+    ///////////////////////////////////////////////////////////
 
     // generate params 
     static const int32_t k = 1;
@@ -69,13 +65,9 @@ int32_t main(int32_t argc, char **argv) {
     static const int32_t Bgbit = 6;        // Base bit gadget
     static const int32_t dg = 5;           // dimension gadget
     static const double stdevBK = bk_stdev; // 3.29e-10;       // BK standard deviation
-    static const int32_t parties = 8;      // number of parties
+    static const int32_t parties = 8;      // number of parties    
 
-    // new parameters 
-    // 2 parties, B=2^9, d=3 -> works
-    // 4 parties, B=2^8, d=4 -> works
     // 8 parties, B=2^6, d=5 -> works 
-    
 
     // params
     LweParams *extractedLWEparams = new_LweParams(n_extract, ks_stdev, max_stdev);
@@ -96,10 +88,6 @@ int32_t main(int32_t argc, char **argv) {
     MKLweKey* MKlwekey = new_MKLweKey(LWEparams, MKparams);
     MKLweKeyGen(MKlwekey);
     cout << "KeyGen MKlwekey: DONE!" << endl;
-
-    ///////////////////////////////////////////////////////////
-    //////       [K1D, K1A, K2D, K2A, K3D, K3A, R1]      //////
-    ///////////////////////////////////////////////////////////
 
     // RLWE key 
     MKRLweKey* MKrlwekey = new_MKRLweKey(RLWEparams, MKparams);
@@ -125,9 +113,128 @@ int32_t main(int32_t argc, char **argv) {
     double time_KG = ((double) end_KG - begin_KG)/CLOCKS_PER_SEC;
     cout << "Finished KEY GENERATION" << endl;
 
-    // int32_t error_count_EncDec = 0;
-    // int32_t error_count_v2m2 = 0;
-    // double argv_time_NAND_v2m2 = 0.0;
+
+    /*============================================================================*/
+
+
+    ///////////////////////////////////////////////////////////
+    //////              [R1, 0, Dec, Agg]               //////
+    ///////////////////////////////////////////////////////////
+
+    // generate params 
+    static const int32_t Bgbit2 = 8;        // Base bit gadget
+    static const int32_t dg2 = 4;           // dimension gadget
+    static const int32_t parties2 = 4;      // number of parties    
+
+    // new parameters 
+    // 4 parties, B=2^8, d=4 -> works
+
+    // params
+    LweParams *extractedLWEparams2 = new_LweParams(n_extract, ks_stdev, max_stdev);
+    LweParams *LWEparams2 = new_LweParams(n, ks_stdev, max_stdev);
+    TLweParams *RLWEparams2 = new_TLweParams(N, k, bk_stdev, max_stdev);
+    MKTFHEParams *MKparams2 = new_MKTFHEParams(n, n_extract, hLWE, stdevLWE, Bksbit, dks, stdevKS, N, 
+                            hRLWE, stdevRLWEkey, stdevRLWE, stdevRGSW, Bgbit2, dg2, stdevBK, parties2);
+
+
+    cout << "Params: DONE!" << endl;
+
+   
+    // Key generation 
+    cout << "Starting KEY GENERATION" << endl;
+    clock_t begin_KG = clock();
+
+    // LWE key        
+    MKLweKey* MKlwekey2 = new_MKLweKey(LWEparams2, MKparams2);
+    MKLweKeyGen(MKlwekey2);
+    cout << "KeyGen MKlwekey: DONE!" << endl;
+
+    // RLWE key 
+    MKRLweKey* MKrlwekey2 = new_MKRLweKey(RLWEparams2, MKparams2);
+    MKRLweKeyGen(MKrlwekey2);
+    cout << "KeyGen MKrlwekey: DONE!" << endl;
+
+    // LWE key extracted 
+    MKLweKey* MKextractedlwekey2 = new_MKLweKey(extractedLWEparams2, MKparams2);
+    MKtLweExtractKey(MKextractedlwekey2, MKrlwekey2);
+    cout << "KeyGen MKextractedlwekey: DONE!" << endl;
+
+    // bootstrapping + key switching keys
+    MKLweBootstrappingKey_v2* MKlweBK2 = new_MKLweBootstrappingKey_v2(LWEparams2, RLWEparams2, MKparams2);
+    MKlweCreateBootstrappingKey_v2(MKlweBK2, MKlwekey2, MKrlwekey2, MKextractedlwekey2, 
+                                extractedLWEparams2, LWEparams2, RLWEparams2, MKparams2);
+    cout << "KeyGen MKlweBK: DONE!" << endl;
+
+    // bootstrapping FFT + key switching keys
+    MKLweBootstrappingKeyFFT_v2* MKlweBK_FFT2 = new_MKLweBootstrappingKeyFFT_v2(MKlweBK2, LWEparams2, RLWEparams2, MKparams2);
+    cout << "KeyGen MKlweBK_FFT: DONE!" << endl;   
+
+    clock_t end_KG = clock();
+    double time_KG = ((double) end_KG - begin_KG)/CLOCKS_PER_SEC;
+    cout << "Finished KEY GENERATION" << endl;
+
+    /*============================================================================*/
+
+    /*============================================================================*/
+
+
+    ///////////////////////////////////////////////////////////
+    //////              [0, R2, Dec, Agg]               //////
+    ///////////////////////////////////////////////////////////
+
+    // generate params 
+    static const int32_t Bgbit3 = 8;        // Base bit gadget
+    static const int32_t dg3 = 4;           // dimension gadget
+    static const int32_t parties3 = 4;      // number of parties    
+
+    // new parameters 
+    // 4 parties, B=2^8, d=4 -> works
+
+    // params
+    LweParams *extractedLWEparams3 = new_LweParams(n_extract, ks_stdev, max_stdev);
+    LweParams *LWEparams3 = new_LweParams(n, ks_stdev, max_stdev);
+    TLweParams *RLWEparams3 = new_TLweParams(N, k, bk_stdev, max_stdev);
+    MKTFHEParams *MKparams3 = new_MKTFHEParams(n, n_extract, hLWE, stdevLWE, Bksbit, dks, stdevKS, N, 
+                            hRLWE, stdevRLWEkey, stdevRLWE, stdevRGSW, Bgbit2, dg3, stdevBK, parties3);
+
+
+    cout << "Params: DONE!" << endl;
+
+   
+    // Key generation 
+    cout << "Starting KEY GENERATION" << endl;
+    clock_t begin_KG = clock();
+
+    // LWE key        
+    MKLweKey* MKlwekey3 = new_MKLweKey(LWEparams3, MKparams3);
+    MKLweKeyGen(MKlwekey3);
+    cout << "KeyGen MKlwekey: DONE!" << endl;
+
+    // RLWE key 
+    MKRLweKey* MKrlwekey3 = new_MKRLweKey(RLWEparams3, MKparams3);
+    MKRLweKeyGen(MKrlwekey3);
+    cout << "KeyGen MKrlwekey: DONE!" << endl;
+
+    // LWE key extracted 
+    MKLweKey* MKextractedlwekey3 = new_MKLweKey(extractedLWEparams3, MKparams3);
+    MKtLweExtractKey(MKextractedlwekey3, MKrlwekey3);
+    cout << "KeyGen MKextractedlwekey: DONE!" << endl;
+
+    // bootstrapping + key switching keys
+    MKLweBootstrappingKey_v2* MKlweBK3 = new_MKLweBootstrappingKey_v2(LWEparams3, RLWEparams3, MKparams3);
+    MKlweCreateBootstrappingKey_v2(MKlweBK3, MKlwekey3, MKrlwekey3, MKextractedlwekey3, 
+                                extractedLWEparams3, LWEparams3, RLWEparams3, MKparams3);
+    cout << "KeyGen MKlweBK: DONE!" << endl;
+
+    // bootstrapping FFT + key switching keys
+    MKLweBootstrappingKeyFFT_v2* MKlweBK_FFT3 = new_MKLweBootstrappingKeyFFT_v2(MKlweBK3, LWEparams3, RLWEparams3, MKparams3);
+    cout << "KeyGen MKlweBK_FFT: DONE!" << endl;   
+
+    clock_t end_KG = clock();
+    double time_KG = ((double) end_KG - begin_KG)/CLOCKS_PER_SEC;
+    cout << "Finished KEY GENERATION" << endl;
+
+    /*============================================================================*/
 
     int numberofReceivers =  2;
     std::cout << numberofReceivers << " Receivers" << endl;
@@ -174,13 +281,13 @@ int32_t main(int32_t argc, char **argv) {
     MKLweSample *gammaEnc1[numberofDataOwners][numberofReceivers];
     MKLweSample *gammaEnc2[numberofDataOwners][numberofReceivers];
 
-    // int epsilon[numberofDataOwners][numberofReceivers]; 
-    // int epsilon1[numberofDataOwners][numberofReceivers]; 
-    // int epsilon2[numberofDataOwners][numberofReceivers]; 
+    MKLweSample *epsilon[numberofDataOwners][numberofReceivers]; 
+    MKLweSample *epsilon1[numberofDataOwners][numberofReceivers]; 
+    MKLweSample *epsilon2[numberofDataOwners][numberofReceivers]; 
 
-    // int delta[numberofDataOwners][numberofReceivers]; 
-    // int delta1[numberofDataOwners][numberofReceivers]; 
-    // int delta2[numberofDataOwners][numberofReceivers]; 
+    int delta[numberofDataOwners][numberofReceivers]; 
+    int delta1[numberofDataOwners][numberofReceivers]; 
+    int delta2[numberofDataOwners][numberofReceivers]; 
 
     // int partialAdd[numberofDataOwners][numberofReceivers]; 
     // int partialAdd1[numberofDataOwners][numberofReceivers]; 
@@ -335,60 +442,70 @@ int32_t main(int32_t argc, char **argv) {
     int t = 2;
     std::cout << "threshold t:"<< "\t" << t << endl;
 
-    // int dataAggforAuthorisedRj[numberofReceivers];
+    int dataAggforAuthorisedRj[numberofReceivers];
 
-    // for (int i = 0; i < numberofReceivers; ++i){
-    //     if (authorisedRj[i] >= t){
-    //         dataAggforAuthorisedRj[i] = 1;
-    //         //std:: cout << " Authorised R[" << i <<"] has " << authorisedRj[i] << " votes" << endl;
-    //     }
-    // }
+    for (int i = 0; i < numberofReceivers; ++i){
+        if (authorisedRj[i] >= t){
+            dataAggforAuthorisedRj[i] = 1;
+            //std:: cout << " Authorised R[" << i <<"] has " << authorisedRj[i] << " votes" << endl;
+        }
+    }
 
     std::cout << "Learning authorised Receivers Done" << endl;
 
     std::cout << "Aggregation Started" << endl; 
 
 
-	/* for (int i = 0; i < numberofDataOwners; ++i){
+	for (int i = 0; i < numberofDataOwners; ++i){
 	    for (int j = 0; j < numberofReceivers; ++j){
+
+          epsilon[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
+          epsilon1[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
+          epsilon2[i][j] = new_MKLweSample_array(nb_bits + 1, LWEparams, MKparams);
+
 	      if (dataAggforAuthorisedRj[j]==1){
 	        ////////////////
 	        //by Agg
 	        //////////////// 
-	      	epsilon1[i][j]= data1[i][j] + alpha1[i][j];
+	      	//epsilon1[i][j]= data1[i][j] + alpha1[i][j]; 
+            full_adder(epsilon1[i][j], dataEnc1[i][j], alphaEnc1[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
 	      	delta1[i][j] = choice_vector1[i][j] + beta1[i][j];
 
 	        ////////////////
 	        // by Dec
 	        ////////////////
-	        epsilon2[i][j]= data2[i][j] + alpha2[i][j];
+	        //epsilon2[i][j]= data2[i][j] + alpha2[i][j];
+            full_adder(epsilon2[i][j], dataEnc2[i][j], alphaEnc2[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
 	      	delta2[i][j] = choice_vector2[i][j] + beta2[i][j];
 
 	        ////////////////
 	        // both
 	        ////////////////
-	        epsilon[i][j] = epsilon1[i][j] + epsilon2[i][j];
+	        //epsilon[i][j] = epsilon1[i][j] + epsilon2[i][j];
+            full_adder(epsilon[i][j], epsilon1[i][j], epsilon2[i][j], nb_bits, MKlweBK_FFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            //ENCRYPT EPSILON
 	        delta[i][j] = delta1[i][j] + delta2[i][j]; 
+            delta[i][j] = delta[i][j];
 
-	        ////////////////
-	        //by Agg
-	        //////////////// 
-	        partialAdd1[i][j] = gamma1[i][j] + epsilon[i][j]*choice_vector1[i][j]+delta[i][j]*data1[i][j];
+	        // ////////////////
+	        // //by Agg
+	        // //////////////// 
+	        // partialAdd1[i][j] = gamma1[i][j] + epsilon[i][j]*choice_vector1[i][j]+delta[i][j]*data1[i][j];
 
-	        ////////////////
-	        // by Dec
-	        ////////////////
-	       	partialAdd2[i][j] = gamma2[i][j] + epsilon[i][j]*choice_vector2[i][j]+delta[i][j]*data2[i][j];
+	        // ////////////////
+	        // // by Dec
+	        // ////////////////
+	       	// partialAdd2[i][j] = gamma2[i][j] + epsilon[i][j]*choice_vector2[i][j]+delta[i][j]*data2[i][j];
 
-	        ////////////////
-	        // by Dec
-	        ////////////////
-	        partialAdd[i][j] = partialAdd1[i][j] + partialAdd2[i][j];
-	        result[i][j] = partialAdd[i][j] - epsilon[i][j]*delta[i][j];
+	        // ////////////////
+	        // // by Dec
+	        // ////////////////
+	        // partialAdd[i][j] = partialAdd1[i][j] + partialAdd2[i][j];
+	        // result[i][j] = partialAdd[i][j] - epsilon[i][j]*delta[i][j];
 
 		    }
 		}
-	} */
+	}
 
 
 
