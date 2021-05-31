@@ -181,12 +181,10 @@ int32_t main(int32_t argc, char **argv) {
         cout << "Message 2: clear = " << mess2 << ", decrypted = " << mess2_dec << endl;
 
         // count encrypt/decrypt errors
-        if (mess1 != mess1_dec)
-        {
+        if (mess1 != mess1_dec){
             error_count_EncDec += 1;
         }
-        if (mess2 != mess2_dec)
-        {
+        if (mess2 != mess2_dec){
             error_count_EncDec += 1;
         }
 
