@@ -1,3 +1,28 @@
+# Privacy-preserving Machine Learning as a Service (pp-MLaaS) in a many-to-many scenario
+
+The code is written using **MK-TFHE library**.
+
+This implementation is used to benchmark for the paper *"Privacy-preserving Machine Learning as a Service (pp-MLaaS) in a many-to-many scenario"*. 
+
+The proposed scenario works for three Data Owners and two Receivers. 
+
+### Quick installation of the proposed Protocol
+
+After cloning the repository, do: 
+```
+cd MK-TFHE 
+git submodule init
+git submodule update 
+mkdir build
+cd build
+cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DENABLE_NAYUKI_PORTABLE=on -DENABLE_NAYUKI_AVX=on -DCMAKE_BUILD_TYPE=debug
+make
+```
+To test (from build):
+```
+./test/PPanalytics-spqlios-fma
+```
+
 # MK-TFHE
 Multi-Key Homomophic Encryption from TFHE
 
