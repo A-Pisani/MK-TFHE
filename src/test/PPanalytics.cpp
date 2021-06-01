@@ -312,7 +312,7 @@ int32_t main(int32_t argc, char **argv) {
     MKLweSample *result[numberofDataOwners][numberofReceivers]; 
 
 
-    int Modulus = 5; //41>2^5 // Modulus should be a prime number
+    int Modulus = 32771; //32771>2^15 // Modulus should be a prime number
 
     // for random numbers
     std::random_device rd;
@@ -726,20 +726,6 @@ int32_t main(int32_t argc, char **argv) {
 
 
     std::cout << "Aggregation Done" << endl; 
-
-
-
-
-
-
-     cout << endl;
-     cout << "Time per KEY GENERATION (seconds)... " << time_KG << endl;
-    
-    // cout << "ERRORS v2m2: " << error_count_v2m2 << " over " << nb_trials << " tests!" << endl;
-    // cout << "Average time per bootNAND_FFT_v2m2: " << argv_time_NAND_v2m2/nb_trials << " seconds" << endl;
-
-    // cout << endl << "ERRORS Encrypt/Decrypt: " << error_count_EncDec << " over " << nb_trials << " tests!" << endl;
-    
 
    
 
