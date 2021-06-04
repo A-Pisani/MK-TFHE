@@ -2432,6 +2432,56 @@ EXPORT void MKbootsXOR_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, cons
     delete_MKLweSample(temp_result);
 }
 
+// MK Bootstrapped XOR3 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsXOR3(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, const MKLweSample *cc, 
+        const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey) 
+{
+    static const Torus32 MU = modSwitchToTorus32(1, 8);
+
+    MKLweSample *temp_result = new_MKLweSample(LWEparams, MKparams);
+
+    //compute: (0, 0) - 2 * (ca + cb + cc) 
+    static const Torus32 XorConst = modSwitchToTorus32(0, 4);
+    MKlweNoiselessTrivial(temp_result, XorConst, MKparams);
+    MKlweSubMulTo(temp_result, 2, ca, MKparams);
+    MKlweSubMulTo(temp_result, 2, cb, MKparams);
+    MKlweSubMulTo(temp_result, 2, cc, MKparams);
+
+
+    //if the phase is positive, the result is 1/8
+    //if the phase is positive, else the result is -1/8
+    MKtfhe_bootstrapFFT_v2m2(result, bkFFT, MU, temp_result, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);   
+
+    delete_MKLweSample(temp_result);
+}
+
+// MK Bootstrapped 2OF3 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsXOR3(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, const MKLweSample *cc, 
+        const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey) 
+{
+    static const Torus32 MU = modSwitchToTorus32(1, 8);
+
+    MKLweSample *temp_result = new_MKLweSample(LWEparams, MKparams);
+
+    //compute: (0, 0) + (ca + cb + cc) 
+    static const Torus32 XorConst = modSwitchToTorus32(0, 4);
+    MKlweNoiselessTrivial(temp_result, XorConst, MKparams);
+    MKlweAddMulTo(temp_result, 1, ca, MKparams);
+    MKlweAddMulTo(temp_result, 1, cb, MKparams);
+    MKlweAddMulTo(temp_result, 1, cc, MKparams);
+
+
+    //if the phase is positive, the result is 1/8
+    //if the phase is positive, else the result is -1/8
+    MKtfhe_bootstrapFFT_v2m2(result, bkFFT, MU, temp_result, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);   
+
+    delete_MKLweSample(temp_result);
+}
+
 // MK Bootstrapped NOT 
 // Only the PK part of RLWEkey is used 
 EXPORT void MKbootsNOT_FFT_v2m2(MKLweSample *result, const MKLweSample *ca, const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 

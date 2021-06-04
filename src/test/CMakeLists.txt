@@ -49,6 +49,7 @@ set(CPP_ITESTS
 	testMKbootFULL_ADDER
 	PPanalytics
 	testMKbootMULTIPLIER
+	testMKbootXOR3
         )
 
 set(C_ITESTS

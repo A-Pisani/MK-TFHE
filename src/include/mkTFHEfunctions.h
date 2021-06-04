@@ -438,5 +438,11 @@ EXPORT MKLweSample *mulTimesPlain(MKLweSample *total, int32_t val, const int32_t
                 const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
                 const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
    
+// MK Bootstrapped XOR3 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKbootsXOR3(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, const MKLweSample *cc, 
+        const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey); 
+
 
 #endif //MKTFHEFUNCTIONS_H
