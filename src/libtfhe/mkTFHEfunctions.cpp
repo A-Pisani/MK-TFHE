@@ -2663,6 +2663,44 @@ void shift_reg(MKLweSample *sum, const MKLweSample *x , const int32_t nb_bits,
         }
     }
 
-
     delete_MKLweSample_array(2, andOp);
+}
+
+// MK Bootstrapped MULTIPLIER_v2  
+// Only the PK part of RLWEkey is used
+EXPORT MKLweSample *mulTimesPlain_v2(MKLweSample *total, int32_t val, const int32_t nb_bits,
+                const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey)  {
+    
+    int count = 0;
+    if(val==1)return total;
+
+    // tmp adders
+    MKLweSample *sum = new_MKLweSample_array(nb_bits+1, LWEparams, MKparams);
+    MKLweSample *sumTemp = new_MKLweSample_array(nb_bits+1, LWEparams, MKparams);
+    MKLweSample *temp = new_MKLweSample_array(nb_bits+1, LWEparams, MKparams);
+
+    for(int k = 0; k < nb_bits + 1; k ++){
+        MKbootsCONSTANT_FFT_v2m2(&sum[k], 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+    }
+
+    while(val){
+        //check for set bits and shift total, count times
+        if (val % 2 == 1)
+        {
+            cout << "In loop: val  = "<< val << endl;
+            for (int i = 0; i < count; i++)
+            {
+                shift_reg(temp, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+                full_adder(sumTemp, sum, temp, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+                for(int k = 0; k < nb_bits + 1; k ++){
+                    MKbootsCOPY_FFT_v2m2(&sum[k], &sumTemp[k], bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+                }
+            }
+        }
+        count++;
+        val /= 2;        
+    }
+
+    return sum;
 }

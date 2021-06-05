@@ -52,6 +52,7 @@ set(CPP_ITESTS
 	testMKbootXOR3
 	testMKboot2OF3
 	testMKbootSHIFT_LEFT_REG
+	testMKbootMULTIPLIER_v2
         )
 
 set(C_ITESTS

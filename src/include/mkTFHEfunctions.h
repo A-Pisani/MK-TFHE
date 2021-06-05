@@ -455,4 +455,11 @@ void shift_reg(MKLweSample *sum, const MKLweSample *x , const int32_t nb_bits,
                 const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
                 const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey) ;
 
+// MK Bootstrapped MULTIPLIER_v2  
+// Only the PK part of RLWEkey is used
+EXPORT MKLweSample *mulTimesPlain_v2(MKLweSample *total, int32_t val, const int32_t nb_bits,
+                const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey);
+    
+
 #endif //MKTFHEFUNCTIONS_H
