@@ -2443,8 +2443,7 @@ EXPORT void MKbootsXOR3(MKLweSample *result, const MKLweSample *ca, const MKLweS
     MKLweSample *temp_result = new_MKLweSample(LWEparams, MKparams);
 
     //compute: (0, 0) - 2 * (ca + cb + cc) 
-    static const Torus32 XorConst = modSwitchToTorus32(0, 4);
-    MKlweNoiselessTrivial(temp_result, XorConst, MKparams);
+    MKlweNoiselessTrivial(temp_result, 0, MKparams);
     MKlweSubMulTo(temp_result, 2, ca, MKparams);
     MKlweSubMulTo(temp_result, 2, cb, MKparams);
     MKlweSubMulTo(temp_result, 2, cc, MKparams);
@@ -2468,11 +2467,10 @@ EXPORT void MKboots2OF3(MKLweSample *result, const MKLweSample *ca, const MKLweS
     MKLweSample *temp_result = new_MKLweSample(LWEparams, MKparams);
 
     //compute: (0, 0) + (ca + cb + cc) 
-    static const Torus32 XorConst = modSwitchToTorus32(0, 4);
-    MKlweNoiselessTrivial(temp_result, XorConst, MKparams);
-    MKlweAddMulTo(temp_result, 1, ca, MKparams);
-    MKlweAddMulTo(temp_result, 1, cb, MKparams);
-    MKlweAddMulTo(temp_result, 1, cc, MKparams);
+    MKlweNoiselessTrivial(temp_result, 0, MKparams);
+    MKlweAddTo(temp_result, ca, MKparams);
+    MKlweAddTo(temp_result, cb, MKparams);
+    MKlweAddTo(temp_result, cc, MKparams);
 
 
     //if the phase is positive, the result is 1/8
