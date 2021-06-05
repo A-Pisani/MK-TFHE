@@ -140,17 +140,17 @@ int32_t main(int32_t argc, char **argv) {
 
 
 
-    /* for (int trial = 0; trial < nb_trials; ++trial)
+     for (int trial = 0; trial < nb_trials; ++trial)
     {
         cout << "****************" << endl;
         cout << "Trial: " << trial << endl;
-        cout << "****************" << endl; */
+        cout << "****************" << endl; 
 
         // use current time as seed for the random generator
         srand(time(0));
 
         int32_t mess1 = rand() % 16;
-        int32_t mess2 =  2;
+        int32_t mess2 = rand() % 16;
         int32_t out = (mess1 * mess2);
         // generate 2 samples array in input
         MKLweSample *test_in1 = new_MKLweSample_array(nb_bits, LWEparams, MKparams);
@@ -165,17 +165,12 @@ int32_t main(int32_t argc, char **argv) {
         // }
         cout << "Encryption: DONE!" << endl;
 
-        int32_t mess1_dec = 0, out_dec = 0;
+        int32_t mess1_dec = 0;
         // verify encrypt 
         for(int i = 0; i < nb_bits; i++){
             int ai = MKbootsSymDecrypt(&test_in1[i], MKlwekey)>0;
             mess1_dec |= (ai<<i);
         }
-        for(int i = 0; i < nb_bits + 1; i++){
-            int ai = MKbootsSymDecrypt(&test_out_v2m2[i], MKlwekey)>0;
-            out_dec |= (ai<<i);
-        }
-        cout << "Result (before mul) decrypted = " << out_dec << endl;
         cout << "Message 1: clear = " << mess1 << ", decrypted = " << mess1_dec << endl;
         cout << "Message 2: clear = " << mess2 << endl;
 
@@ -215,7 +210,7 @@ int32_t main(int32_t argc, char **argv) {
         // delete samples
         delete_MKLweSample_array( nb_bits + 1, test_out_v2m2);
         delete_MKLweSample_array(nb_bits, test_in1);
-    //}
+    }
 
     cout << endl;
     cout << "Time per KEY GENERATION (seconds)... " << time_KG << endl;

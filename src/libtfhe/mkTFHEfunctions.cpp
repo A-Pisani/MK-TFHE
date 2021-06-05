@@ -2610,12 +2610,12 @@ EXPORT MKLweSample *mulTimesPlain(MKLweSample *total, int32_t val, const int32_t
 
     for (int i = 0; i < val-1; i++) {
         if(i == 0)
-            full_adder(sum, total, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            full_adder_v2(sum, total, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
         else{
             if(i%2==0){
-                full_adder(sum, sum2, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+                full_adder_v2(sum, sum2, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
             }else if(i%2==1){
-                 full_adder(sum2, sum, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+                 full_adder_v2(sum2, sum, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
             }
         }  
     }
@@ -2690,7 +2690,8 @@ EXPORT MKLweSample *mulTimesPlain_v2(MKLweSample *total, int32_t val, const int3
             for (int i = 0; i < count; i++)
             {
                 shift_reg(temp, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
-                full_adder(sumTemp, sum, temp, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+                // full_adder(sumTemp, sum, temp, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+                full_adder_v2(sumTemp, sum, temp, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
                 for(int k = 0; k < nb_bits + 1; k ++){
                     MKbootsCOPY_FFT_v2m2(&sum[k], &sumTemp[k], bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
                 }
