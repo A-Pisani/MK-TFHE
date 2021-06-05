@@ -217,12 +217,6 @@ int32_t main(int32_t argc, char **argv) {
         }
 
 
-
-
-
-
-
-
         // delete samples
         delete_MKLweSample(test_out_v2m2);
         delete_MKLweSample(test_in2);
