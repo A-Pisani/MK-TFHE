@@ -443,6 +443,16 @@ EXPORT MKLweSample *mulTimesPlain(MKLweSample *total, int32_t val, const int32_t
 EXPORT void MKbootsXOR3(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, const MKLweSample *cc, 
         const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
         const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey); 
+// MK Bootstrapped 2OF3 
+// Only the PK part of RLWEkey is used 
+EXPORT void MKboots2OF3(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, const MKLweSample *cc, 
+        const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+        const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey) ;
 
+// MK Bootstrapped SHIFT_LEFT  
+// Only the PK part of RLWEkey is used
+void shift_reg(MKLweSample *sum, const MKLweSample *x , const int32_t nb_bits,
+                const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey) ;
 
 #endif //MKTFHEFUNCTIONS_H

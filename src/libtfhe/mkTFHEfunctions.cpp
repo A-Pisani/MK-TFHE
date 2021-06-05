@@ -2459,7 +2459,7 @@ EXPORT void MKbootsXOR3(MKLweSample *result, const MKLweSample *ca, const MKLweS
 
 // MK Bootstrapped 2OF3 
 // Only the PK part of RLWEkey is used 
-EXPORT void MKbootsXOR3(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, const MKLweSample *cc, 
+EXPORT void MKboots2OF3(MKLweSample *result, const MKLweSample *ca, const MKLweSample *cb, const MKLweSample *cc, 
         const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
         const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey) 
 {
@@ -2608,31 +2608,61 @@ EXPORT MKLweSample *mulTimesPlain(MKLweSample *total, int32_t val, const int32_t
 
     // tmp adders
     MKLweSample *sum = new_MKLweSample_array(nb_bits+1, LWEparams, MKparams);
-    //MKLweSample *sum2 = new_MKLweSample_array(nb_bits+1, LWEparams, MKparams);
-    // for(int i=0; i< nb_bits + 1; i++){
-    //     MKbootsCONSTANT_FFT_v2m2(sum + i, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
-    //         MKparams, MKrlwekey);
-    //     MKbootsCONSTANT_FFT_v2m2(sum2 + i, 0, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
-    //         MKparams, MKrlwekey);
-    // }
+    MKLweSample *sum2 = new_MKLweSample_array(nb_bits+1, LWEparams, MKparams);
 
     for (int i = 0; i < val-1; i++) {
         if(i == 0)
             full_adder(sum, total, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
         else{
-            //if(i%2==0){
-                //full_adder(sum, sum2, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
-                full_adder(sum, sum, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
-            // }
-            // else if(i%2==1){
-            //     full_adder(sum2, sum, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
-            // }
+            if(i%2==0){
+                full_adder(sum, sum2, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            }else if(i%2==1){
+                 full_adder(sum2, sum, total, nb_bits, bkFFT, LWEparams, extractedLWEparams, RLWEparams, MKparams, MKrlwekey);
+            }
         }  
     }
 
-    //if(val%2 == 0)
+    if(val%2 == 0)
         return sum;
-    //else 
-    //    return sum2;
+    else 
+        return sum2;
 }
 
+// MK Bootstrapped SHIFT_LEFT  
+// Only the PK part of RLWEkey is used
+void shift_reg(MKLweSample *sum, const MKLweSample *x , const int32_t nb_bits,
+                const MKLweBootstrappingKeyFFT_v2 *bkFFT, const LweParams* LWEparams, const LweParams *extractedLWEparams, 
+                const TLweParams* RLWEparams, const MKTFHEParams *MKparams, const MKRLweKey *MKrlwekey)  {   
+
+    MKLweSample *andOp = new_MKLweSample_array(2, LWEparams, MKparams);
+    MKLweSample *left = new_MKLweSample(LWEparams, MKparams);
+    MKLweSample *leftNot = new_MKLweSample(LWEparams, MKparams);
+    MKbootsCONSTANT_FFT_v2m2(left, 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+    MKbootsNOT_FFT_v2m2(leftNot, left, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+ 
+    for (int32_t i = 0; i < nb_bits; ++i) {
+        if(i != 0 && i!= nb_bits - 1){
+            MKbootsAND_FFT_v2m2(andOp, left, x + i - 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); 
+            MKbootsAND_FFT_v2m2(andOp + 1, leftNot, x + i + 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+            MKbootsXOR_FFT_v2m2(sum + i, andOp, andOp + 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+        }else if(i == nb_bits - 1){
+            MKbootsAND_FFT_v2m2(andOp, left, x + i - 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); 
+            MKbootsCOPY_FFT_v2m2(sum + i, andOp, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+        }else{
+            MKbootsAND_FFT_v2m2(andOp + 1, leftNot, x + i + 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey); 
+            MKbootsCOPY_FFT_v2m2(sum + i, andOp + 1, bkFFT, LWEparams, extractedLWEparams, RLWEparams,
+            MKparams, MKrlwekey);
+        }
+    }
+
+
+    delete_MKLweSample_array(2, andOp);
+}

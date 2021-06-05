@@ -50,6 +50,8 @@ set(CPP_ITESTS
 	PPanalytics
 	testMKbootMULTIPLIER
 	testMKbootXOR3
+	testMKboot2OF3
+	testMKbootSHIFT_LEFT_REG
         )
 
 set(C_ITESTS
