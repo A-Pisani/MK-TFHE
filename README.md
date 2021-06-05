@@ -8,6 +8,10 @@ The proposed scenario works for three Data Owners and two Receivers.
 
 ### Quick installation of the proposed Protocol
 
+```
+git clone -p only_three_keys https://github.com/federicagerminario31/MK-TFHE/
+```
+
 After cloning the repository, do: 
 ```
 cd MK-TFHE 
@@ -15,7 +19,7 @@ git submodule init
 git submodule update 
 mkdir build
 cd build
-cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=on -DENABLE_NAYUKI_PORTABLE=on -DENABLE_NAYUKI_AVX=on -DCMAKE_BUILD_TYPE=debug
+cmake ../src -DENABLE_TESTS=on -DENABLE_FFTW=off -DENABLE_NAYUKI_PORTABLE=on -DENABLE_NAYUKI_AVX=on -DCMAKE_BUILD_TYPE=debug
 make
 ```
 To test (from build):
