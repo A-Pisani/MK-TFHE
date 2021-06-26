@@ -9,7 +9,7 @@ The proposed scenario works for three Data Owners and two Receivers.
 ### Quick installation of the proposed Protocol
 
 ```
-git clone -p only_three_keys https://github.com/federicagerminario31/MK-TFHE/
+git clone -b only_three_keys https://github.com/federicagerminario31/MK-TFHE/
 ```
 
 After cloning the repository, do: 
