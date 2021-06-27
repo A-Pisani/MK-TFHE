@@ -61,10 +61,26 @@ Here are listed in more detail the **Four** main improvements to the existing li
 The code for these new functions can be found in [MK-TFHE/src/libtfhe/mkTFHEfunctions.cpp](https://github.com/federicagerminario31/MK-TFHE/blob/master/src/libtfhe/mkTFHEfunctions.cpp). The associated prototyped instead can be found in [MK-TFHE/src/include/mkTFHEfunctions.h](https://github.com/federicagerminario31/MK-TFHE/blob/master/src/include/mkTFHEfunctions.h)
 
 
-### Benchmark Results
+### Benchmark Results (and discussion)
 As a result of the improvements done on the MK-TFHE library we can see how the benchmark took benefit from the various improvements listed before.  
   
-![Fig. 2: Benchmark Results.](benchmark.png "Title")  
+![Fig. 2: Benchmark Results.](benchmark.png "Title")   
+ 
+In the table below it can be found the Performance results for each player of PRIDA (computation time displayed in s).   
+  
+|*Protocols*   | *Data Owner*  |  *Receiver* | *Aggregator*  |  *Decryptor* |
+|---|---|---|---|---|
+| Protocol 2 with MK-TFHE  |  4.452 | 2.275  | 2632.251  |  3160.709  |
+  
+It is good to highlight that the difference in performances (even if only slightly different) between the two brokers are due to the higher number of steps performed by the Decryptor with respect to the Aggregator in the Beaver's triplets phase.
+  
+While the first improvment is mandatory to at least deploy our protocol, it can be noticed that when we apply improvements 2, 3 and 4 listed above, we obtain a better result.  
+In fact in all cases we do have an improvement of at least 50% with respect to the plain MK-TFHE implementation.  
+However the protocol is still very slow compared with the other versions of PRIDA using other cryptographic techniques like: 
+- asymmetric multi-key fully homomorphic encryption (MK-FHE), 
+- threshold fully homomorphic encryption (Th-FHE).  
+
+It is important to notice however that the version of the protocol using as a cryptographic technique symmetric multi-key fully homomorphic encryption (i.e., MK-TFHE) is inherently slow due to the usage of low level implementation of the Homomorphic encryption.  
 
 # MK-TFHE
 Multi-Key Homomophic Encryption from TFHE
