@@ -117,8 +117,8 @@ int32_t main(int32_t argc, char **argv) {
         MKlweCreateBootstrappingKey_v2(MKlweBK[i], MKlwekey[i], MKrlwekey, MKextractedlwekey, 
                                     extractedLWEparams, LWEparams, RLWEparams, MKparams);
     }
-    //cout << "KeyGen MKlweBK: DONE!" << endl;
-    //cout << "KeyGen MKlweBK_FFT: DONE!" << endl;   
+    cout << "KeyGen MKlweBK: DONE!" << endl;
+    cout << "KeyGen MKlweBK_FFT: DONE!" << endl;   
 
     clock_t end_KG = clock();
     double time_KG = ((double) end_KG - begin_KG)/CLOCKS_PER_SEC;
@@ -249,7 +249,7 @@ int32_t main(int32_t argc, char **argv) {
     MKLweSample *result[numberofDataOwners][numberofReceivers]; 
 
 
-    int Modulus = 41; //32771>2^15 // Modulus should be a prime number
+    int Modulus = 32771; //32771 > 2^15 // Modulus should be a prime number
 
     // for random numbers
     std::random_device rd;
@@ -261,16 +261,16 @@ int32_t main(int32_t argc, char **argv) {
         for(int j=0; j<numberofReceivers; j++){
             // choosing Receivers for each DO
             choice_vector[i][j] = dist(rd) % 2;
-            std::cout << "random number for choice: " << choice_vector[i][j] << endl;
+            std::cout << "random number for choice vector: " << choice_vector[i][j] << endl;
 
             if(choice_vector[i][j]!= 0)
                 choice_vector1[i][j] = dist(rd) % choice_vector[i][j];
             else
                 choice_vector1[i][j] = 0;
-            std::cout << "random share 1 for choice: " << choice_vector1[i][j] << endl;
+            //std::cout << "random share 1 for choice: " << choice_vector1[i][j] << endl;
 
             choice_vector2[i][j] = choice_vector[i][j] - choice_vector1[i][j];
-            std::cout << "random share 2 for choice: " << choice_vector2[i][j] << endl;
+            std::cout << "random share for choice vector generated." << choice_vector2[i][j] << endl;
 
             // data of each DO          -------> TO BE ENCRYPTED
             if(choice_vector[i][j] == 1)
@@ -284,10 +284,10 @@ int32_t main(int32_t argc, char **argv) {
                 data1[i][j] = dist(rd) % data[i][j];
             else
                 data1[i][j] = 0;
-            std::cout << "random share 1 of data: " << data1[i][j] << endl;
+            //std::cout << "random share 1 of data: " << data1[i][j] << endl;
 
             data2[i][j] = data[i][j] - data1[i][j];
-            std::cout << "random share 2 of data: " << data2[i][j] << endl;
+            std::cout << "random share of data generated." << endl;
             // data of each DO          -------> ENCRYPTED --> layers: DO-Dec, DO-Agg, R
             dataEnc1[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams4);
             dataEnc2[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams4);
@@ -305,6 +305,7 @@ int32_t main(int32_t argc, char **argv) {
                 MKlweNthPartyEncrypt(&dataEnc1[i][j][k], 2 + j, (data1[i][j]>>k)&1, &MKlwekey4->key[2 + j]);
                 MKlweNthPartyEncrypt(&dataEnc2[i][j][k], 2 + j, (data2[i][j]>>k)&1, &MKlwekey4->key[2 + j]);
             }
+            std::cout << "random share of data encrypted with DO " << i << " and Receiver " << j << " specific key." << endl;
 
 
             // generating alpha
@@ -315,9 +316,9 @@ int32_t main(int32_t argc, char **argv) {
             }else{
                 alpha1[i][j] = 0;
             }
-            std::cout << "random share 1 of alpha: " << alpha1[i][j] << endl;
+            //std::cout << "random share 1 of alpha: " << alpha1[i][j] << endl;
             alpha2[i][j] = alpha[i][j] - alpha1[i][j];
-            std::cout << "random share 2 of alpha: " << alpha2[i][j] << endl;
+            std::cout << "random share of alpha generated." << endl;
 
             // alpha          -------> ENCRYPTED
             alphaEnc1[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams4);
@@ -334,6 +335,8 @@ int32_t main(int32_t argc, char **argv) {
                 MKlweNthPartyEncrypt(&alphaEnc1[i][j][k], 2 + j, (alpha1[i][j]>>k)&1, &MKlwekey4->key[2 + j]);
                 MKlweNthPartyEncrypt(&alphaEnc2[i][j][k], 2 + j, (alpha2[i][j]>>k)&1, &MKlwekey4->key[2 + j]);
             }
+            std::cout << "random share of alpha encrypted with DO " << i << " and Receiver " << j << " specific key." << endl;
+
 
             // generating beta
             beta[i][j] = dist(rd) % Modulus;
@@ -343,9 +346,9 @@ int32_t main(int32_t argc, char **argv) {
             }else{
                 beta1[i][j] = 0;
             }
-            std::cout << "random share 1 of beta: " << beta1[i][j] << endl;
+            //std::cout << "random share 1 of beta: " << beta1[i][j] << endl;
             beta2[i][j] = beta[i][j] - beta1[i][j];
-            std::cout << "random share 2 of beta: " << beta2[i][j] << endl;
+            std::cout << "random share of beta generated." << endl;
 
 
             //constracting gamma and its shares
@@ -356,9 +359,9 @@ int32_t main(int32_t argc, char **argv) {
             }else{
                 gamma1[i][j] = 0;
             }
-            std::cout << "random share 1 of gamma: " << gamma1[i][j] << endl;
+            //std::cout << "random share 1 of gamma: " << gamma1[i][j] << endl;
             gamma2[i][j] = gamma[i][j] - gamma1[i][j];
-            std::cout << "random share 2 of gamma: " << gamma2[i][j] << endl; 
+            std::cout << "random share of gamma generated." << endl; 
             // gamma          -------> ENCRYPTED
             gammaEnc1[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams4);
             gammaEnc2[i][j] = new_MKLweSample_array(nb_bits, LWEparams, MKparams4);
@@ -374,6 +377,8 @@ int32_t main(int32_t argc, char **argv) {
                 MKlweNthPartyEncrypt(&gammaEnc1[i][j][k], 2 + j, (gamma1[i][j]>>k)&1, &MKlwekey4->key[2 + j]);
                 MKlweNthPartyEncrypt(&gammaEnc2[i][j][k], 2 + j, (gamma2[i][j]>>k)&1, &MKlwekey4->key[2 + j]);
             }
+            std::cout << "random share of gamma encrypted with DO " << i << " and Receiver " << j << " specific key." << endl;
+
         }
     }
 
@@ -452,9 +457,9 @@ int32_t main(int32_t argc, char **argv) {
 
     std::cout << "Learning authorised Receivers Started" << endl;
 
-    int authorisedRj[numberofReceivers];
-    int authorisedRj1[numberofReceivers];
-    int authorisedRj2[numberofReceivers];
+    int authorisedRj[numberofReceivers] = {0,0};
+    int authorisedRj1[numberofReceivers]= {0,0};
+    int authorisedRj2[numberofReceivers]= {0,0};
 
 
     //  Agg - the addition of shared choice vector1
@@ -463,7 +468,11 @@ int32_t main(int32_t argc, char **argv) {
         for (int i = 0; i < numberofDataOwners; ++i){
             authorisedRj1[j] += choice_vector1[i][j];
         } 
+        std::cout << "Aggregator adds shares of the choice vectors for Rec " << j << endl;
     }
+    std::cout << "Aggregator computed partial sum is sent to Decryptor"<< endl;
+
+
 
 
     // Dec - the addition of shared choice vector2  
@@ -472,7 +481,10 @@ int32_t main(int32_t argc, char **argv) {
         for (int i = 0; i < numberofDataOwners; ++i){
             authorisedRj2[j] += choice_vector2[i][j];
         } 
+        std::cout << "Decryptor adds shares of the choice vectors for Rec " << j << endl;
     }
+    std::cout << "Decryptor computed partial sum is sent to Aggregator"<< endl;
+
 
     std::cout << "Learning authorised Receivers by Agg and Dec Started" << endl;  
 
@@ -480,7 +492,6 @@ int32_t main(int32_t argc, char **argv) {
     // Agg and Dec compute the number of DOs for Rj
     for (int j = 0; j < numberofReceivers; ++j){
         authorisedRj[j] = authorisedRj1[j] + authorisedRj2[j];
-        authorisedRj[j] = authorisedRj[j] ;
     }
 
     int t = 2;
@@ -491,7 +502,7 @@ int32_t main(int32_t argc, char **argv) {
     for (int i = 0; i < numberofReceivers; ++i){
         if (authorisedRj[i] >= t){
             dataAggforAuthorisedRj[i] = 1;
-            //std:: cout << " Authorised R[" << i <<"] has " << authorisedRj[i] << " votes" << endl;
+            std:: cout << " Authorised R[" << i <<"] has " << authorisedRj[i] << " votes" << endl;
         }
     }
 
