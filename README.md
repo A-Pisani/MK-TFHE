@@ -34,14 +34,31 @@ When Agg1 and Agg2 receive individual ciphertexts encrypted with different sets 
 
 PRIDA involves the following three parties which are represented in Fig. 1:  
 ![Fig. 1: PRIDA players.](players.png "Title")  
-– Data Owner DO owns some confidential input data and outsources this confidential data to the Aggregators once its data is first encrypted with MP-FHE and further secret shared. DO also secretly defines which Data Analyser can have access to the aggregate result involving its input.  
-– Receiver R obtains the data aggregation result over the inputs from many DOs in cleartext if authorised using the decryption algorithm of MP-FHE.  
-– The two Brokers (Aggregator and Decryptor) are two non-colluding cloud servers which collect the encrypted data from many DOs, perform the data aggregation requested by Receivers, and send the results to the authorised Receiver. It is important to notice that the Aggregator is only in touch with the Data Owners and the Decryptor while the Decryptor can communicate only with the Aggregator and the Receivers.    
+- *Data Owner* DO owns some confidential input data and outsources this confidential data to the Brokers encrypted and secretly shared. DO also secretly defines which Receivers can access the aggregate result involving its input.  
+- *Receiver* R obtains the data aggregation result over the inputs from many DOs in cleartext if authorised.  
+- The two *Brokers* (*Aggregator* and *Decryptor*) are two non-colluding cloud servers which collect the encrypted data from many DOs, perform the data aggregation requested by Receivers, and send the results to the authorised Receiver. It is important to notice that the Aggregator is only in touch with the Data Owners and the Decryptor while the Decryptor can communicate only with the Aggregator and the Receivers.    
 
 The details of multiplication over protected data are provided below:
 
+### MK-TFHE Imporvments
+We have done **Four** main improvements to the existing library:
+1) PRELIMINARY. We have implemented some useful gates: 
+    - All basic gates present in TFHE library
+    - Complex ones like *Subtractor*, *XOR3*, *2OF3*, *Shift_Left*, ...
+2) FULL ADDER. We have implemented a *full_adder_v2* using the gates XOR3 and 2OF3
+3) MULTIPLICATION. We have implemented a *multiplier_v2* using shift left operations and additions
+4) MK STRUCTURE. Improved the masking and unmasking operation to use data structures of maximum three keys.
+    - *MKlweFirstPartyEncrypt*: at p-th block of mask, generate a random mask and add to the masked message at other blocks of mask, fill zeros
+    - *MKlweNthPartyEncrypt*: Add p-th party mask
+    - *MKlweNthPartyUnmask*: remove p-th party mask
+    - *MKlweLastPartyDecrypt*: decrypt by removing the last party's mask  
+
+The code for these new functions can be found in [MK-TFHE/src/libtfhe/mkTFHEfunctions.cpp](https://github.com/federicagerminario31/MK-TFHE/blob/master/src/libtfhe/mkTFHEfunctions.cpp). The associated prototyped instead can be found in [MK-TFHE/src/include/mkTFHEfunctions.h](https://github.com/federicagerminario31/MK-TFHE/blob/master/src/include/mkTFHEfunctions.h)
 
 
+### Benchmark Results
+As a result of the improvements done on the MK-TFHE library we can see how the benchmark took benefit from the various improvements listed before.  
+![Fig. 2: Benchmark Results.](benchmark.png "Title")  
 
 # MK-TFHE
 Multi-Key Homomophic Encryption from TFHE
