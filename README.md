@@ -40,10 +40,15 @@ PRIDA involves the following three parties which are represented in Fig. 1:
 
 The details of multiplication over protected data are provided below:
 
-### MK-TFHE Imporvments
-We have done **Four** main improvements to the existing library:
+### MK-TFHE Improvments
+First of all to implement our protocol using MK-TFHE library we had many issues to target. Firstly, MK-TFHE differently from the TFHE library is only a *proof-of-concept* and as such only the basic *NAND* gate was implemented, tested and benchmarked. Since our protocol needs as basic operations additions and multiplications we had to implement and test all the missing gates.  
+These gates were the building blocks for more complex logic circuits like the full_adder, full_subtracter, shift_left and many more which are needed to achieve our goals.  
+  
+Another challenging issue is that while in the MK-TFHE proposed paper it seemed that it was possible to perform partial encryption and partial decryption in the proposed implementation only two functions were provided which allowed to encrypt and decrypt with the Multi-key data structure for all the involved parties. To this extent a modification to the existing implementation was needed in order to achieve a particular masking and unmasking operation for a party p. 
+
+Here are listed in more detail the **Four** main improvements to the existing library:
 1) PRELIMINARY. We have implemented some useful gates: 
-    - All basic gates present in TFHE library
+    - All basic gates present in TFHE library which were not present in MK-TFHE (*OR*, *AND*, *XOR*, *NOT*, *COPY*, *CONSTANT*, ...)
     - Complex ones like *Subtractor*, *XOR3*, *2OF3*, *Shift_Left*, ...
 2) FULL ADDER. We have implemented a *full_adder_v2* using the gates XOR3 and 2OF3
 3) MULTIPLICATION. We have implemented a *multiplier_v2* using shift left operations and additions
@@ -58,6 +63,7 @@ The code for these new functions can be found in [MK-TFHE/src/libtfhe/mkTFHEfunc
 
 ### Benchmark Results
 As a result of the improvements done on the MK-TFHE library we can see how the benchmark took benefit from the various improvements listed before.  
+  
 ![Fig. 2: Benchmark Results.](benchmark.png "Title")  
 
 # MK-TFHE
