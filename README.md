@@ -27,6 +27,18 @@ To test (from build):
 ./test/PPanalytics-spqlios-fma
 ```
 
+### Proposed Protocol: PRIDA based on MK-TFHE
+The proposed protocol is a PRIDA implementation using a symmetric multi-key FHE. To deploy the protocol MK-TFHE (a symmetric multi-key FHE) is used. 
+As far as keys are concerned each Receiver Rj shares one common key kj with all DOs and each DO establishes one pairwise key with each Aggregator;
+When Agg1 and Agg2 receive individual ciphertexts encrypted with different sets of keys, they partially decrypt them with the keys that they know and re-encrypt them with their unique key only known by themselves.
+
+![Fig. 1: PRIDA players.](players.png "Title")
+
+The details of multiplication over protected data are provided below:
+
+
+
+
 # MK-TFHE
 Multi-Key Homomophic Encryption from TFHE
 
