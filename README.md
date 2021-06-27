@@ -62,7 +62,9 @@ The details of Phase 2 are represented as follows:
 3. To be used for Beaver’s triplets, DO generates secret shares of random numbers α<sub>i</sub> and β<sub>i</sub> where γ<sub>i</sub> = α<sub>i</sub> ∗ β<sub>i</sub>. (α<sub>i</sub> = α<sub>i1</sub> + α<sub>i2</sub> and β<sub>i</sub> = β<sub>i1</sub> + β<sub>i2</sub>).
 4. sends the shares of \[d<sub>i</sub>], c<sub>i</sub>, γ<sub>i</sub>, α<sub>i</sub>, and β<sub>i</sub> to Broker1 and Broker2.
 
-After receiving all data from DOs, *Broker1 and Broker2* perform the following steps to obtain thedata aggregation result over protected DOs’ private data.
+After receiving all data from DOs, *Broker1 and Broker2* perform the following steps to obtain thedata aggregation result over protected DOs’ private data.  
+  
+0. Unmask the known secret keys of DO<sub>ik</sub> and Agg<sub>k</sub> to change the part of \[d<sub>ik</sub>] related to the DO<sub>ik</sub>’s secret key to the Agg<sub>k</sub>’s secret key. Agg1 and Agg2 end up with samples encrypted with the keys of R<sub>j</sub>, Agg<sub>1</sub>, Agg<sub>2</sub>.  
 1. Each Broker computes \[ϵ<sub>ik</sub>] with the addition of \[d<sub>ik</sub>] and α<sub>ik</sub>, and δ<sub>ik</sub> with the addition of c<sub>ik</sub> and β<sub>ik</sub>, where k = 1 or 2.
 2. Each Broker sends \[ϵ<sub>ik</sub>] and δ<sub>ik</sub> to the other Broker.
 3. Each Broker obtains \[ϵ<sub>i</sub>] and δ<sub>i</sub> making use of \[ϵ<sub>i1</sub>] and \[ϵ<sub>i2</sub>], and δ<sub>i1</sub> and δ<sub>i2</sub>, respectively.
@@ -71,7 +73,6 @@ After receiving all data from DOs, *Broker1 and Broker2* perform the following s
 6. After receiving 5, Broker2 finds γi + \[d<sub>i</sub>] ∗ δ<sub>i</sub> + c<sub>i</sub> ∗ ϵ<sub>i</sub>.
 7. Then, Broker2 subtracts \[ϵ<sub>i</sub>] ∗ δ<sub>i</sub> from the previous result.
 8. Broker2 obtains \[d<sub>i</sub>] ∗ c<sub>i</sub> for only one DO.
-
 9. Broker2 adds all multiplication result vectors to find the data aggregation results for Receivers.  
 Finally, Broker2 has the data aggregation vector \[s<sub>j</sub> ] which is equal to the summation (for *i* which goes from 1 to n) of \[d<sub>i</sub>] ∗ c<sub>i</sub>.
   
@@ -100,6 +101,11 @@ Here are listed in more detail the **Four** main improvements to the existing li
     - *MKlweNthPartyEncrypt*: Add p-th party mask
     - *MKlweNthPartyUnmask*: remove p-th party mask
     - *MKlweLastPartyDecrypt*: decrypt by removing the last party's mask  
+
+The final improvement is aimed at reducing as maximum as possible the number of keys:
+- Each Broker needs to store 4 keys 1 for each DO and 1 which will be replacing the others
+- Each data will need (at most) 3 layers of encryption only 
+
 
 The code for these new functions can be found in [MK-TFHE/src/libtfhe/mkTFHEfunctions.cpp](https://github.com/federicagerminario31/MK-TFHE/blob/master/src/libtfhe/mkTFHEfunctions.cpp). The associated prototyped instead can be found in [MK-TFHE/src/include/mkTFHEfunctions.h](https://github.com/federicagerminario31/MK-TFHE/blob/master/src/include/mkTFHEfunctions.h)
 
