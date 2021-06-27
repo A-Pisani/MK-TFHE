@@ -29,8 +29,8 @@ To test (from build):
 
 ### Proposed Protocol: PRIDA based on MK-TFHE
 The proposed protocol is a PRIDA implementation using a symmetric multi-key FHE. To deploy the protocol MK-TFHE (a symmetric multi-key FHE) is used.  
-As far as keys are concerned each Receiver Rj shares one common key kj with all DOs and each DO establishes one pairwise key with each Aggregator;  
-When Agg1 and Agg2 receive individual ciphertexts encrypted with different sets of keys, they partially decrypt them with the keys that they know and re-encrypt them with their unique key only known by themselves.  
+As far as keys are concerned each Receiver Rj shares one common key k<sub>j</sub> with all DOs and each DO establishes one pairwise key with each Aggregator;  
+When Agg and Dec receive individual ciphertexts encrypted with different sets of keys, they partially decrypt them with the keys that they know and re-encrypt them with their unique key only known by themselves.  
 
 PRIDA involves the following three parties which are represented in Fig. 1:  
 ![Fig. 1: PRIDA players.](players.png "Title")  
@@ -38,7 +38,50 @@ PRIDA involves the following three parties which are represented in Fig. 1:
 - *Receiver* R obtains the data aggregation result over the inputs from many DOs in cleartext if authorised.  
 - The two *Brokers* (*Aggregator* and *Decryptor*) are two non-colluding cloud servers which collect the encrypted data from many DOs, perform the data aggregation requested by Receivers, and send the results to the authorised Receiver. It is important to notice that the Aggregator is only in touch with the Data Owners and the Decryptor while the Decryptor can communicate only with the Aggregator and the Receivers.    
 
-The details of multiplication over protected data are provided below:
+The details of multiplication over protected data are provided below:  
+
+The index *i* ∈ {1, . . . , n} represents a Data Owner (DO) whereas index *j* ∈ {1, . . . , m} represents a Receiver, Rj (n and m are two natural numbers). An MK-FHE ciphertext is denoted with \[.].
+
+**Phase 1: Deciding the authorised Receivers.** At the end of Phase 1, two Brokers can have the information of chosen Receivers who are able to obtain the data aggregation result. Basically, Brokers who get the shared choice vectors, compute simple additions over these shared choice vectors and finally find the number of DOs who chose R<sub>j</sub>. Therefore, both know who is authorised to receive the data aggregation result.  
+In more details, Phase 1 consists of the following steps:  
+*Each Data Owner*  
+1. generates secret shares of its choice vector c<sub>i</sub> consisting choices of 0 or 1 for Receivers.
+2. sends c<sub>i1</sub> to Broker1 and c<sub>i2</sub> to Broker2.
+  
+*Each Broker*  
+1. After receiving shares of the choice vectors for R<sub>j</sub>s, adds these shares without any interaction
+with the other Broker.
+2. This partial sum is sent to the other Broker.
+3. both Brokers bring together the partial sums to observe whether Receiver R<sub>j</sub> is authorised. If the total sum is bigger than or equal to *threshold t*, Brokers operates the data aggregation over the private data for Receiver R<sub>j</sub>. Otherwise, the two non-colluding Brokers stop processing for R<sub>j</sub>.  
+  
+**Phase 2: Computing the data aggregation result.** Phase 2 is simply the componentwise multiplication of the choice vector and the shared-encrypted input data vector using Beaver’s triplets. Then, the multiplication result vectors of DOs are componentwisely added to see the data aggregation result vector.
+The details of Phase 2 are represented as follows:  
+*Each DO*
+1. generates secret shares of its private data vector di for Receivers1.
+2. After secret shares’ generation, each component of shared data vectors are encrypted with the public keys of R<sub>j</sub> and two Brokers.
+3. To be used for Beaver’s triplets, DO generates secret shares of random numbers α<sub>i</sub> and β<sub>i</sub> where γ<sub>i</sub> = α<sub>i</sub> ∗ β<sub>i</sub>. (α<sub>i</sub> = α<sub>i1</sub> + α<sub>i2</sub> and β<sub>i</sub> = β<sub>i1</sub> + β<sub>i2</sub>).
+4. sends the shares of \[d<sub>i</sub>], c<sub>i</sub>, γ<sub>i</sub>, α<sub>i</sub>, and β<sub>i</sub> to Broker1 and Broker2.
+
+After receiving all data from DOs, *Broker1 and Broker2* perform the following steps to obtain thedata aggregation result over protected DOs’ private data.
+1. Each Broker computes \[ϵ<sub>ik</sub>] with the addition of \[d<sub>ik</sub>] and α<sub>ik</sub>, and δ<sub>ik</sub> with the addition of c<sub>ik</sub> and β<sub>ik</sub>, where k = 1 or 2.
+2. Each Broker sends \[ϵ<sub>ik</sub>] and δ<sub>ik</sub> to the other Broker.
+3. Each Broker obtains \[ϵ<sub>i</sub>] and δ<sub>i</sub> making use of \[ϵ<sub>i1</sub>] and \[ϵ<sub>i2</sub>], and δ<sub>i1</sub> and δ<sub>i2</sub>, respectively.
+4. Each Broker computes γ<sub>ik</sub> + \[d<sub>ik</sub>] ∗ δ<sub>i</sub> + c<sub>ik</sub> ∗ \[ϵ<sub>i</sub>], k = 1 or 2.
+5. After this step, Broker1 sends 4 to Broker2.
+6. After receiving 5, Broker2 finds γi + \[d<sub>i</sub>] ∗ δ<sub>i</sub> + c<sub>i</sub> ∗ ϵ<sub>i</sub>.
+7. Then, Broker2 subtracts \[ϵ<sub>i</sub>] ∗ δ<sub>i</sub> from the previous result.
+8. Broker2 obtains \[d<sub>i</sub>] ∗ c<sub>i</sub> for only one DO.
+
+9. Broker2 adds all multiplication result vectors to find the data aggregation results for Receivers.  
+Finally, Broker2 has the data aggregation vector \[s<sub>j</sub> ] which is equal to the summation (for *i* which goes from 1 to n) of \[d<sub>i</sub>] ∗ c<sub>i</sub>.
+  
+**Phase 3: Decryption of the data aggregation result.** The final steps of the data aggregation is the decryption as follows:
+1. Broker2 sends the data aggregation vector \[s<sub>j</sub> ] to Broker1.
+2. Broker2 partially decrypts \[s<sub>j</sub> ] for the authorised Receivers.
+3. Like Broker2, Broker1 partially decrypts \[s<sub>j</sub> ] for the authorised Receivers.
+4. Broker1 sends this partially decrypted data aggregation vector \[s<sub>j</sub> ] to Broker2.
+5. Broker2 sends the data from 2 and 3 to authorised Receiver R<sub>j</sub> .
+6. Finally, *authorised R<sub>j</sub>* firstly partially decrypts its part, merges all partial decryptions of \[s<sub>j</sub> ], and receives the data aggregation result.
 
 ### MK-TFHE Improvments
 First of all to implement our protocol using MK-TFHE library we had many issues to target. Firstly, MK-TFHE differently from the TFHE library is only a *proof-of-concept* and as such only the basic *NAND* gate was implemented, tested and benchmarked. Since our protocol needs as basic operations additions and multiplications we had to implement and test all the missing gates.  
@@ -86,7 +129,7 @@ Please notice that in terms of FFT (Fast Fourier Transform) libraries it is not 
 1) SPQLIOS_AVX: compiles libtfhe-spqlios-avx.a, using tfhe's dedicated avx assembly version for FFT computations
 2) SPQLIOS_FMA: compiles libtfhe-spqlios-fma.a, using tfhe's dedicated fma assembly version for FFT computations
 3) NAYUKI_AVX: compiles libtfhe-nayuki-avx.a, using the avx assembly version of nayuki for FFT computations
-4) compiles libtfhe-nayuki-portable.a, using the fast C version of nayuki for FFT computations
+4) NAYUKI_PORTABLE: compiles libtfhe-nayuki-portable.a, using the fast C version of nayuki for FFT computations
 
 # MK-TFHE
 Multi-Key Homomophic Encryption from TFHE
