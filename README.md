@@ -1,10 +1,10 @@
-# Privacy-preserving Machine Learning as a Service (pp-MLaaS) in a many-to-many scenario
+# PRIDA: PRIvacy-preserving data aggregation with multiple Data Analysers 
 
 The code is written using **MK-TFHE library**.
 
-This implementation is used to benchmark for the paper *"Privacy-preserving Machine Learning as a Service (pp-MLaaS) in a many-to-many scenario"*. 
+This implementation is used to benchmark an extended version of the MK-TFHE library for the symmetric version of MK-FHE. 
 
-The proposed scenario works for three Data Owners and two Receivers. 
+The proposed scenario works for three Data Owners and two Receivers. Between them two Brokers, Aggregator and Decryptor are required.
 
 ### Quick installation of the proposed Protocol
 
@@ -81,6 +81,12 @@ However the protocol is still very slow compared with the other versions of PRID
 - threshold fully homomorphic encryption (Th-FHE).  
 
 It is important to notice however that the version of the protocol using as a cryptographic technique symmetric multi-key fully homomorphic encryption (i.e., MK-TFHE) is inherently slow due to the usage of low level implementation of the Homomorphic encryption.  
+
+Please notice that in terms of FFT (Fast Fourier Transform) libraries it is not casual the choice of SPQLIOS_AVX for compilation because it is the one that provides better results in terms of timing. Below we have listed a ranking of the FFT libraries from the faster to the slowest one:  
+1) SPQLIOS_AVX: compiles libtfhe-spqlios-avx.a, using tfhe's dedicated avx assembly version for FFT computations
+2) SPQLIOS_FMA: compiles libtfhe-spqlios-fma.a, using tfhe's dedicated fma assembly version for FFT computations
+3) NAYUKI_AVX: compiles libtfhe-nayuki-avx.a, using the avx assembly version of nayuki for FFT computations
+4) compiles libtfhe-nayuki-portable.a, using the fast C version of nayuki for FFT computations
 
 # MK-TFHE
 Multi-Key Homomophic Encryption from TFHE
