@@ -28,11 +28,15 @@ To test (from build):
 ```
 
 ### Proposed Protocol: PRIDA based on MK-TFHE
-The proposed protocol is a PRIDA implementation using a symmetric multi-key FHE. To deploy the protocol MK-TFHE (a symmetric multi-key FHE) is used. 
-As far as keys are concerned each Receiver Rj shares one common key kj with all DOs and each DO establishes one pairwise key with each Aggregator;
-When Agg1 and Agg2 receive individual ciphertexts encrypted with different sets of keys, they partially decrypt them with the keys that they know and re-encrypt them with their unique key only known by themselves.
+The proposed protocol is a PRIDA implementation using a symmetric multi-key FHE. To deploy the protocol MK-TFHE (a symmetric multi-key FHE) is used.  
+As far as keys are concerned each Receiver Rj shares one common key kj with all DOs and each DO establishes one pairwise key with each Aggregator;  
+When Agg1 and Agg2 receive individual ciphertexts encrypted with different sets of keys, they partially decrypt them with the keys that they know and re-encrypt them with their unique key only known by themselves.  
 
-![Fig. 1: PRIDA players.](players.png "Title")
+PRIDA involves the following three parties which are represented in Fig. 1:  
+![Fig. 1: PRIDA players.](players.png "Title")  
+– Data Owner DO owns some confidential input data and outsources this confidential data to the Aggregators once its data is first encrypted with MP-FHE and further secret shared. DO also secretly defines which Data Analyser can have access to the aggregate result involving its input.  
+– Receiver R obtains the data aggregation result over the inputs from many DOs in cleartext if authorised using the decryption algorithm of MP-FHE.  
+– The two Brokers (Aggregator and Decryptor) are two non-colluding cloud servers which collect the encrypted data from many DOs, perform the data aggregation requested by Receivers, and send the results to the authorised Receiver. It is important to notice that the Aggregator is only in touch with the Data Owners and the Decryptor while the Decryptor can communicate only with the Aggregator and the Receivers.    
 
 The details of multiplication over protected data are provided below:
 
