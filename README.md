@@ -42,6 +42,11 @@ The details of multiplication over protected data are provided below:
 
 The index *i* ∈ {1, . . . , n} represents a Data Owner (DO) whereas index *j* ∈ {1, . . . , m} represents a Receiver, Rj (n and m are two natural numbers). An MK-FHE ciphertext is denoted with \[.].
 
+**Phase 0: Key Generation.** Setup part executed by DO<sub>i</sub>, R<sub>j</sub>, Agg<sub>1</sub> and Agg<sub>2</sub>. 
+1. Generation of symmetric shared key between data owner DO<sub>i</sub> with Agg<sub>1</sub> and DO<sub>i</sub> with Agg<sub>2</sub> : DO<sub>i1</sub> and DO<sub>i2</sub>.
+2. Generation of Receiver R<sub>j</sub>, Agg<sub>1</sub> and Agg<sub>2</sub> specific keys.
+
+
 **Phase 1: Deciding the authorised Receivers.** At the end of Phase 1, two Brokers can have the information of chosen Receivers who are able to obtain the data aggregation result. Basically, Brokers who get the shared choice vectors, compute simple additions over these shared choice vectors and finally find the number of DOs who chose R<sub>j</sub>. Therefore, both know who is authorised to receive the data aggregation result.  
 In more details, Phase 1 consists of the following steps:  
 *Each Data Owner*  
@@ -49,16 +54,15 @@ In more details, Phase 1 consists of the following steps:
 2. sends c<sub>i1</sub> to Broker1 and c<sub>i2</sub> to Broker2.
   
 *Each Broker*  
-1. After receiving shares of the choice vectors for R<sub>j</sub>s, adds these shares without any interaction
-with the other Broker.
+1. After receiving shares of the choice vectors for R<sub>j</sub>s, adds these shares without any interaction with the other Broker.
 2. This partial sum is sent to the other Broker.
 3. both Brokers bring together the partial sums to observe whether Receiver R<sub>j</sub> is authorised. If the total sum is bigger than or equal to *threshold t*, Brokers operates the data aggregation over the private data for Receiver R<sub>j</sub>. Otherwise, the two non-colluding Brokers stop processing for R<sub>j</sub>.  
   
 **Phase 2: Computing the data aggregation result.** Phase 2 is simply the componentwise multiplication of the choice vector and the shared-encrypted input data vector using Beaver’s triplets. Then, the multiplication result vectors of DOs are componentwisely added to see the data aggregation result vector.
 The details of Phase 2 are represented as follows:  
 *Each DO*
-1. generates secret shares of its private data vector di for Receivers1.
-2. After secret shares’ generation, each component of shared data vectors are encrypted with the public keys of R<sub>j</sub> and two Brokers.
+1. generates secret shares of its private data vector d<sub>i</sub> for Receivers.
+2. After secret shares’ generation, each component of shared data vectors is encrypted with the public keys of R<sub>j</sub> and the keys shared with the two Brokers (keys DO<sub>i1</sub> and DO<sub>i2</sub>).
 3. To be used for Beaver’s triplets, DO generates secret shares of random numbers α<sub>i</sub> and β<sub>i</sub> where γ<sub>i</sub> = α<sub>i</sub> ∗ β<sub>i</sub>. (α<sub>i</sub> = α<sub>i1</sub> + α<sub>i2</sub> and β<sub>i</sub> = β<sub>i1</sub> + β<sub>i2</sub>).
 4. sends the shares of \[d<sub>i</sub>], c<sub>i</sub>, γ<sub>i</sub>, α<sub>i</sub>, and β<sub>i</sub> to Broker1 and Broker2.
 
