@@ -1,5 +1,8 @@
 # PRIDA: PRIvacy-preserving data aggregation with multiple Data Analysers 
-
+#### *<div align="center">By Beyza Bozdemir¹, Federica Germinario¹, Alessandro Pisani¹, Jakub Klemsa², and Melek Önen¹  </div>*
+#### *<div align="center">  (¹EURECOM; ²Czech Technical University).</div>*
+  
+   
 The code is written using **MK-TFHE library**.
 
 This implementation is used to benchmark an extended version of the MK-TFHE library for the symmetric version of MK-FHE. 
@@ -88,7 +91,7 @@ Finally, Broker2 has the data aggregation vector \[s<sub>j</sub> ] which is equa
 5. Broker2 sends the data from 2 and 3 to authorised Receiver R<sub>j</sub> .
 6. Finally, *authorised R<sub>j</sub>* firstly partially decrypts its part, merges all partial decryptions of \[s<sub>j</sub> ], and receives the data aggregation result.
 
-### MK-TFHE Improvments
+### MK-TFHE Improvements
 First of all to implement our protocol using MK-TFHE library we had many issues to target. Firstly, MK-TFHE differently from the TFHE library is only a *proof-of-concept* and as such only the basic *NAND* gate was implemented, tested and benchmarked. Since our protocol needs as basic operations additions and multiplications we had to implement and test all the missing gates.  
 These gates were the building blocks for more complex logic circuits like the full_adder, full_subtracter, shift_left and many more which are needed to achieve our goals.  
   
@@ -127,17 +130,16 @@ In the table below it can be found the Performance results for each player of PR
   
 It is good to highlight that the difference in performances (even if only slightly different) between the two brokers are due to the higher number of steps performed by the Decryptor with respect to the Aggregator in the Beaver's triplets phase.
   
-While the first improvment is mandatory to at least deploy our protocol, it can be noticed that when we apply improvements 2, 3 and 4 listed above, we obtain a better result.  
-In fact in all cases we do have an improvement of at least 50% with respect to the plain MK-TFHE implementation.  
+It can be noticed that when we apply improvements 2, 3 and 4 listed above, we obtain a better result. In fact in all cases we do have an improvement of at least 50% with respect to the plain MK-TFHE implementation.  
 However the protocol is still very slow compared with the other versions of PRIDA using other cryptographic techniques like: 
 - asymmetric multi-key fully homomorphic encryption (MK-FHE), 
 - threshold fully homomorphic encryption (Th-FHE).  
 
 It is important to notice however that the version of the protocol using as a cryptographic technique symmetric multi-key fully homomorphic encryption (i.e., MK-TFHE) is inherently slow due to the usage of low level implementation of the Homomorphic encryption.  
 
-Please notice that in terms of FFT (Fast Fourier Transform) libraries it is not casual the choice of SPQLIOS_AVX for compilation because it is the one that provides better results in terms of timing. Below we have listed a ranking of the FFT libraries from the faster to the slowest one:  
-1) SPQLIOS_AVX: compiles libtfhe-spqlios-avx.a, using tfhe's dedicated avx assembly version for FFT computations
-2) SPQLIOS_FMA: compiles libtfhe-spqlios-fma.a, using tfhe's dedicated fma assembly version for FFT computations
+Please notice that in terms of FFT (Fast Fourier Transform) libraries it is not casual the choice of SPQLIOS_FMA for compilation because it is the one that provides better results in terms of timing. Below we have listed a ranking of the FFT libraries from the faster to the slowest one:  
+1) SPQLIOS_FMA: compiles libtfhe-spqlios-fma.a, using tfhe's dedicated fma assembly version for FFT computations
+2) SPQLIOS_AVX: compiles libtfhe-spqlios-avx.a, using tfhe's dedicated avx assembly version for FFT computations
 3) NAYUKI_AVX: compiles libtfhe-nayuki-avx.a, using the avx assembly version of nayuki for FFT computations
 4) NAYUKI_PORTABLE: compiles libtfhe-nayuki-portable.a, using the fast C version of nayuki for FFT computations
 
