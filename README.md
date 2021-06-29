@@ -45,51 +45,51 @@ The details of multiplication over protected data are provided below:
 
 The index *i* ∈ {1, . . . , n} represents a Data Owner (DO) whereas index *j* ∈ {1, . . . , m} represents a Data Analyser, DAj (n and m are two natural numbers). An MK-FHE ciphertext is denoted with \[.].
 
-**Phase 0: Key Generation.** Setup part executed by DO<sub>i</sub>, DA<sub>j</sub>, Agg<sub>1</sub> and Agg<sub>2</sub>. 
-1. Generation of symmetric shared key between data owner DO<sub>i</sub> with Agg<sub>1</sub> and DO<sub>i</sub> with Agg<sub>2</sub> : DO<sub>i1</sub> and DO<sub>i2</sub>.
-2. Generation of Data Analyser DA<sub>j</sub>, Agg<sub>1</sub> and Agg<sub>2</sub> specific keys.
+**Phase 0: Key Generation.** Setup part executed by *DO<sub>i</sub>*, *DA<sub>j</sub>*, *Agg<sub>1</sub>* and *Agg<sub>2</sub>*. 
+1. Generation of symmetric shared key between data owner *DO<sub>i</sub>* with *Agg<sub>1</sub>* and *DO<sub>i</sub>* with *Agg<sub>2</sub>* : *DO<sub>i1</sub>* and *DO<sub>i2</sub>*.
+2. Generation of Data Analyser *DA<sub>j</sub>*, *Agg<sub>1</sub>* and *Agg<sub>2</sub>* specific keys.
 
 
-**Phase 1: Deciding the authorised Data Analysers.** At the end of Phase 1, two Aggregators can have the information of chosen Data Analysers who are able to obtain the data aggregation result. Basically, Aggregators who get the shared choice vectors, compute simple additions over these shared choice vectors and finally find the number of DOs who chose DA<sub>j</sub>. Therefore, both know who is authorised to receive the data aggregation result.  
+**Phase 1: Deciding the authorised Data Analysers.** At the end of Phase 1, two Aggregators can have the information of chosen Data Analysers who are able to obtain the data aggregation result. Basically, Aggregators who get the shared choice vectors, compute simple additions over these shared choice vectors and finally find the number of *DOs* who chose *DA<sub>j</sub>*. Therefore, both know who is authorised to receive the data aggregation result.  
 In more details, Phase 1 consists of the following steps:  
 *Each Data Owner*  
 1. generates secret shares of its choice vector c<sub>i</sub> consisting choices of 0 or 1 for Data Analysers.
-2. sends c<sub>i1</sub> to Agg1 and c<sub>i2</sub> to Agg2.
+2. sends *c<sub>i1</sub>* to Agg1 and *c<sub>i2</sub>* to Agg2.
   
 *Each Aggregator*  
-1. After receiving shares of the choice vectors for DA<sub>j</sub>s, adds these shares without any interaction with the other Aggregator.
+1. After receiving shares of the choice vectors for *DA<sub>j</sub>*s, adds these shares without any interaction with the other Aggregator.
 2. This partial sum is sent to the other Aggregator.
-3. both Aggregators bring together the partial sums to observe whether Data Analyser DA<sub>j</sub> is authorised. If the total sum is bigger than or equal to *threshold t*, Aggregators operates the data aggregation over the private data for Data Analyser DA<sub>j</sub>. Otherwise, the two non-colluding Aggregators stop processing for DA<sub>j</sub>.  
+3. both Aggregators bring together the partial sums to observe whether Data Analyser *DA<sub>j</sub>* is authorised. If the total sum is bigger than or equal to *threshold t*, Aggregators operates the data aggregation over the private data for Data Analyser *DA<sub>j</sub>*. Otherwise, the two non-colluding Aggregators stop processing for *DA<sub>j</sub>*.  
   
 **Phase 2: Computing the data aggregation result.** Phase 2 is simply the componentwise multiplication of the choice vector and the shared-encrypted input data vector using Beaver’s triplets. Then, the multiplication result vectors of DOs are componentwisely added to see the data aggregation result vector.
 The details of Phase 2 are represented as follows:  
 *Each DO*
-1. generates secret shares of its private data vector d<sub>i</sub> for Data Analysers.
-2. After secret shares’ generation, each component of shared data vectors is encrypted with the public keys of DA<sub>j</sub> and the keys shared with the two Aggregators (keys DO<sub>i1</sub> and DO<sub>i2</sub>).
-3. To be used for Beaver’s triplets, DO generates secret shares of random numbers α<sub>i</sub> and β<sub>i</sub> where γ<sub>i</sub> = α<sub>i</sub> ∗ β<sub>i</sub>. (α<sub>i</sub> = α<sub>i1</sub> + α<sub>i2</sub> and β<sub>i</sub> = β<sub>i1</sub> + β<sub>i2</sub>).
-4. sends the shares of \[d<sub>i</sub>], c<sub>i</sub>, γ<sub>i</sub>, α<sub>i</sub>, and β<sub>i</sub> to Agg1 and Agg2.
+1. generates secret shares of its private data vector *d<sub>i</sub>* for Data Analysers.
+2. After secret shares’ generation, each component of shared data vectors is encrypted with the public keys of *DA<sub>j</sub>* and the keys shared with the two Aggregators (keys *DO<sub>i1</sub>* and *DO<sub>i2</sub>*).
+3. To be used for Beaver’s triplets, DO generates secret shares of random numbers *α<sub>i</sub>* and *β<sub>i</sub>* where *γ<sub>i</sub> = α<sub>i</sub> ∗ β<sub>i</sub>*. (*α<sub>i</sub> = α<sub>i1</sub> + α<sub>i2</sub>* and *β<sub>i</sub> = β<sub>i1</sub> + β<sub>i2</sub>*).
+4. sends the shares of \[*d<sub>i</sub>*], *c<sub>i</sub>*, *γ<sub>i</sub>*, *α<sub>i</sub>*, and *β<sub>i</sub>* to *Agg1* and *Agg2*.
 
 After receiving all data from DOs, *Aggregator1 and Aggregator2* perform the following steps to obtain thedata aggregation result over protected DOs’ private data.  
   
-0. Unmask the known secret keys of DO<sub>ik</sub> and Agg<sub>k</sub> to change the part of \[d<sub>ik</sub>] related to the DO<sub>ik</sub>’s secret key to the Agg<sub>k</sub>’s secret key. Agg1 and Agg2 end up with samples encrypted with the keys of DA<sub>j</sub>, Agg<sub>1</sub>, Agg<sub>2</sub>.  
-1. Each Aggregator computes \[ϵ<sub>ik</sub>] with the addition of \[d<sub>ik</sub>] and α<sub>ik</sub>, and δ<sub>ik</sub> with the addition of c<sub>ik</sub> and β<sub>ik</sub>, where k = 1 or 2.
-2. Each Aggregator sends \[ϵ<sub>ik</sub>] and δ<sub>ik</sub> to the other Aggregator.
-3. Each Aggregator obtains \[ϵ<sub>i</sub>] and δ<sub>i</sub> making use of \[ϵ<sub>i1</sub>] and \[ϵ<sub>i2</sub>], and δ<sub>i1</sub> and δ<sub>i2</sub>, respectively.
-4. Each Aggregator computes γ<sub>ik</sub> + \[d<sub>ik</sub>] ∗ δ<sub>i</sub> + c<sub>ik</sub> ∗ \[ϵ<sub>i</sub>], k = 1 or 2.
+0. Unmask the known secret keys of *DO<sub>ik</sub>* and *Agg<sub>k</sub>* to change the part of \[*d<sub>ik</sub>*] related to the *DO<sub>ik</sub>*’s secret key to the *Agg<sub>k</sub>*’s secret key. Agg1 and Agg2 end up with samples encrypted with the keys of *DA<sub>j</sub>*, *Agg<sub>1</sub>*, *Agg<sub>2</sub>*.  
+1. Each Aggregator computes \[*ϵ<sub>ik</sub>*] with the addition of \[*d<sub>ik</sub>*] and *α<sub>ik</sub>*, and *δ<sub>ik</sub>* with the addition of *c<sub>ik</sub>* and *β<sub>ik</sub>*, where *k = 1 or 2*.
+2. Each Aggregator sends \[*ϵ<sub>ik</sub>*] and *δ<sub>ik</sub>* to the other Aggregator.
+3. Each Aggregator obtains \[*ϵ<sub>i</sub>*] and *δ<sub>i</sub>* making use of \[*ϵ<sub>i1</sub>*] and \[*ϵ<sub>i2</sub>*], and *δ<sub>i1</sub>* and *δ<sub>i2</sub>*, respectively.
+4. Each Aggregator computes *γ<sub>ik</sub> + \[d<sub>ik</sub>] ∗ δ<sub>i</sub> + c<sub>ik</sub> ∗ \[ϵ<sub>i</sub>], k = 1 or 2*.
 5. After this step, Aggregator1 sends 4 to Aggregator2.
-6. After receiving 5, Aggregator2 finds γi + \[d<sub>i</sub>] ∗ δ<sub>i</sub> + c<sub>i</sub> ∗ ϵ<sub>i</sub>.
-7. Then, Aggregator2 subtracts \[ϵ<sub>i</sub>] ∗ δ<sub>i</sub> from the previous result.
-8. Aggregator2 obtains \[d<sub>i</sub>] ∗ c<sub>i</sub> for only one DO.
+6. After receiving 5, Aggregator2 finds *γi + \[d<sub>i</sub>] ∗ δ<sub>i</sub> + c<sub>i</sub> ∗ ϵ<sub>i</sub>*.
+7. Then, Aggregator2 subtracts *\[ϵ<sub>i</sub>] ∗ δ<sub>i</sub>* from the previous result.
+8. Aggregator2 obtains *\[d<sub>i</sub>] ∗ c<sub>i</sub>* for only one DO.
 9. Aggregator2 adds all multiplication result vectors to find the data aggregation results for Data Analysers.  
-Finally, Aggregator2 has the data aggregation vector \[s<sub>j</sub> ] which is equal to the summation (for *i* which goes from 1 to n) of \[d<sub>i</sub>] ∗ c<sub>i</sub>.
+Finally, Aggregator2 has the data aggregation vector \[*s<sub>j</sub>*] which is equal to the summation (for *i* which goes from 1 to n) of *\[d<sub>i</sub>] ∗ c<sub>i</sub>*.
   
 **Phase 3: Decryption of the data aggregation result.** The final steps of the data aggregation is the decryption as follows:
-1. Agg2 sends the data aggregation vector \[s<sub>j</sub> ] to Aggregator1.
-2. Agg2 partially decrypts \[s<sub>j</sub> ] for the authorised Data Analysers.
-3. Like Agg2, Agg1 partially decrypts \[s<sub>j</sub> ] for the authorised Data Analysers.
-4. Agg1 sends this partially decrypted data aggregation vector \[s<sub>j</sub> ] to Agg2.
-5. Agg2 sends the data from 2 and 3 to authorised Data Analyser DA<sub>j</sub> .
-6. Finally, *authorised DA<sub>j</sub>* firstly partially decrypts its part, merges all partial decryptions of \[s<sub>j</sub> ], and receives the data aggregation result.
+1. Agg2 sends the data aggregation vector *\[s<sub>j</sub>]* to Aggregator1.
+2. Agg2 partially decrypts *\[s<sub>j</sub>]* for the authorised Data Analysers.
+3. Like Agg2, Agg1 partially decrypts *\[s<sub>j</sub>]* for the authorised Data Analysers.
+4. Agg1 sends this partially decrypted data aggregation vector *\[s<sub>j</sub>]* to Agg2.
+5. Agg2 sends the data from 2 and 3 to authorised Data Analyser *DA<sub>j</sub>*.
+6. Finally, *authorised DA<sub>j</sub>* firstly partially decrypts its part, merges all partial decryptions of *\[s<sub>j</sub> ]*, and receives the data aggregation result.
 
 ### MK-TFHE Improvements
 First of all to implement our protocol using MK-TFHE library we had many issues to target. Firstly, MK-TFHE differently from the TFHE library is only a *proof-of-concept* and as such only the basic *NAND* gate was implemented, tested and benchmarked. Since our protocol needs as basic operations additions and multiplications we had to implement and test all the missing gates.  
