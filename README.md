@@ -122,13 +122,13 @@ As a result of the improvements done on the MK-TFHE library we can see how the b
   
 ![Fig. 2: Benchmark Results.](benchmark.png "Title")   
  
-In the table below it can be found the Performance results for each player of PRIDA (computation time displayed in s).   
+In the table below it can be found the Performance results for each player of PRIDA (computation time displayed in *seconds*).   
   
 |*Protocols*   | *Data Owner*  |  *Receiver* | *Aggregator*  |  *Decryptor* |
 |---|---|---|---|---|
 | Protocol 2 with MK-TFHE  |  4.452 | 2.275  | 2632.251  |  3160.709  |
   
-It is good to highlight that the difference in performances (even if only slightly different) between the two Aggregators are due to the higher number of steps performed by the Decryptor with respect to the Aggregator in the Beaver's triplets phase.
+It is good to highlight that the difference in performances (even if only slightly different) between the two Aggregators are due to the higher number of steps performed by the Agg2 with respect to the Agg1 in the Beaver's triplets phase.
   
 It can be noticed that when we apply improvements 2, 3 and 4 listed above, we obtain a better result. In fact in all cases we do have an improvement of at least 50% with respect to the plain MK-TFHE implementation.  
 However the protocol is still very slow compared with the other versions of PRIDA using other cryptographic techniques like: 
