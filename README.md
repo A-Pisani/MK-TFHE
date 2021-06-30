@@ -7,7 +7,7 @@ The code is written using **MK-TFHE library**.
 
 This implementation is used to benchmark an extended version of the MK-TFHE library for the symmetric version of MK-FHE. 
 
-The proposed scenario works for three Data Owners and two Data Analysers. Between them two Aggregators, Aggregator1 and Aggregator2 are required.
+The proposed scenario works for three Data Owners and two Data Analysers. Between them two Aggregators are required: Aggregator1 and Aggregator2 .
 
 ### Quick installation of the proposed Protocol
 
@@ -36,7 +36,7 @@ As far as keys are concerned each Data Analyser DAj shares one common key k<sub>
 When Agg and Agg2 receive individual ciphertexts encrypted with different sets of keys, they partially decrypt them with the keys that they know and re-encrypt them with their unique key only known by themselves.  
 
 PRIDA involves the following three parties which are represented in Fig. 1:  
-![Fig. 1: PRIDA players.](players.png "Title")  
+![Fig. 1: PRIDA players.](players.png "PRIDA players: Data Owners, Aggregator1, Aggregator2 and Data Analysers")  
 - *Data Owner* DO owns some confidential input data and outsources this confidential data to the Aggregators encrypted and secretly shared. DO also secretly defines which Data Analysers can access the aggregate result involving its input.  
 - *Data Analyser* DA obtains the data aggregation result over the inputs from many DOs in cleartext if authorised.  
 - The two *Aggregators* (*Aggregator1* and *Aggregator2*) are two non-colluding cloud servers which collect the encrypted data from many DOs, perform the data aggregation requested by Data Analysers, and send the results to the authorised Data Analyser. It is important to notice that the Agg1 is only in touch with the Data Owners and the Agg2 while the Agg2 can communicate only with the Aggregator and the Data Analysers.    
@@ -120,7 +120,7 @@ The code for these new functions can be found in [MK-TFHE/src/libtfhe/mkTFHEfunc
 ### Benchmark Results (and discussion)
 As a result of the improvements done on the MK-TFHE library we can see how the benchmark took benefit from the various improvements listed before.  
   
-![Fig. 2: Benchmark Results.](benchmark.png "Title")   
+![Fig. 2: Benchmark Results.](benchmark.png "Benchmark results for each PRIDA player.")   
  
 In the table below it can be found the Performance results for each player of PRIDA (computation time displayed in *seconds*).   
   
